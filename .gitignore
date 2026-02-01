@@ -1,0 +1,54 @@
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# OS files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+desktop.ini
+
+# Editor directories and files
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+.idea
+*.swp
+*.swo
+*~
+
+# Temporary files
+*.tmp
+*.temp
+*.cache
+
+# Build artifacts
+dist/
+build/
+
+# Backup files
+*.bak
+*.backup
+*~
+
+# Archive files (if you want to exclude them)
+*.zip
+*.tar.gz
+*.rar
+
+# Don't commit sensitive PHP configs (if any contain credentials)
+# Uncomment if needed:
+# php/config.php
