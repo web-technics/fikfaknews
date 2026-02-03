@@ -1161,9 +1161,16 @@
       </style>
     </section>
     <!-- Standen.info Banner -->
-    <div style="text-align:center;margin-bottom:20px;">
-      <a href="https://www.standen.info/?ref=fikfak" target="_blank" rel="noopener noreferrer" class="newsletter-banner-link">
-        <img src="https://i.imgur.com/TXColVI.png" alt="Standen.info Banner - FikFak News Partner" style="max-width:100%;height:auto;border-radius:8px;" loading="lazy" width="1200" height="400">
+    <div style="text-align:center;margin-bottom:20px;display:flex;justify-content:center;">
+      <a href="https://www.standen.info/?ref=fikfak" target="_blank" rel="noopener noreferrer" class="newsletter-banner-link" style="display:block;max-width:90%;width:100%;">
+        <picture>
+          <!-- Mobile: Square banner for screens smaller than 768px -->
+          <source media="(max-width: 767px)" srcset="assets/images/modulaire (600 x 600 px).png">
+          <!-- Desktop: Landscape banner for screens 768px and larger -->
+          <source media="(min-width: 768px)" srcset="assets/images/standen_info_leaderboard.png">
+          <!-- Fallback for older browsers -->
+          <img src="assets/images/standen_info_leaderboard.png" alt="Standen.info Banner - FikFak News Partner" style="max-width:100%;height:auto;border-radius:8px;width:100%;display:block;" loading="lazy">
+        </picture>
       </a>
     </div>
 
