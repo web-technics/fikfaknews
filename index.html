@@ -36,15 +36,15 @@
   <meta property="og:site_name" content="FikFak News" />
   <meta property="og:title" content="📰 FikFak News — Alternatief Nieuws & Actuele Analyse" />
   <meta property="og:description" content="🎯 De nieuwste FikFak News uitzending! Onafhankelijk nieuws met kritische blik op media en politiek door winnaar Beste Journalist 2025 Dirk Theuns. Nagels met koppen slaan! 🔥" />
-  <meta property="og:image" content="https://fikfak.news/wp-content/webp-express/webp-images/uploads/2025/03/edbd31bb-b98a-4b94-afaf-93e46887928a.jpg.webp" />
-  <meta property="og:image:secure_url" content="https://fikfak.news/wp-content/webp-express/webp-images/uploads/2025/03/edbd31bb-b98a-4b94-afaf-93e46887928a.jpg.webp" />
-  <meta property="og:image:type" content="image/webp" />
-  <meta property="og:image:width" content="1200" />
-  <meta property="og:image:height" content="630" />
-  <meta property="og:image:alt" content="FikFak News - Onafhankelijk nieuws en analyse van Dirk Theuns" />
+  <meta property="og:image" content="https://img.youtube.com/vi/3UEf4G1eVtA/hqdefault.jpg" />
+  <meta property="og:image:secure_url" content="https://img.youtube.com/vi/3UEf4G1eVtA/hqdefault.jpg" />
+  <meta property="og:image:type" content="image/jpeg" />
+  <meta property="og:image:width" content="480" />
+  <meta property="og:image:height" content="360" />
+  <meta property="og:image:alt" content="FikFak News - Nieuwste uitzending" />
   <meta property="og:locale" content="nl_NL" />
   <meta property="og:locale:alternate" content="nl_BE" />
-  <meta property="og:video" content="https://www.youtube.com/embed/VIDEO_ID" />
+  <meta property="og:video" content="https://www.youtube.com/embed/3UEf4G1eVtA" />
   <meta property="og:video:type" content="text/html" />
   <meta property="og:video:width" content="1280" />
   <meta property="og:video:height" content="720" />
@@ -63,9 +63,9 @@
   <meta name="twitter:url" content="https://go.fikfak.news/" />
   <meta name="twitter:title" content="📰 FikFak News — Alternatief Nieuws & Actuele Analyse" />
   <meta name="twitter:description" content="🎯 De nieuwste FikFak News uitzending! Onafhankelijk nieuws met kritische blik op media en politiek door winnaar Beste Journalist 2025 Dirk Theuns. 🔥" />
-  <meta name="twitter:image" content="https://fikfak.news/wp-content/webp-express/webp-images/uploads/2025/03/edbd31bb-b98a-4b94-afaf-93e46887928a.jpg.webp" />
+  <meta name="twitter:image" content="https://img.youtube.com/vi/3UEf4G1eVtA/hqdefault.jpg" />
   <meta name="twitter:image:alt" content="FikFak News - Onafhankelijk nieuws" />
-  <meta name="twitter:player" content="https://www.youtube.com/embed/VIDEO_ID" />
+  <meta name="twitter:player" content="https://www.youtube.com/embed/3UEf4G1eVtA" />
   <meta name="twitter:player:width" content="1280" />
   <meta name="twitter:player:height" content="720" />
   
@@ -496,8 +496,15 @@
     .newsletter-content p{margin:0;color:var(--muted)}
     .newsletter-benefits{margin:8px 0 0 0;color:var(--muted);font-size:13px;line-height:1.4;display:inline-block;text-align:left}
     .newsletter-form{width:100%;display:flex;flex-direction:column;gap:10px;margin-top:6px;align-items:stretch}
-    .newsletter-input{padding:12px 14px;border-radius:10px;border:1px solid rgba(255,255,255,0.06);background:rgba(255,255,255,0.02);color:inherit;font-size:15px;outline:none;max-width:520px;width:100%;min-height:44px;touch-action:manipulation;-webkit-appearance:none;appearance:none;}
-    .newsletter-input:focus{box-shadow:0 6px 18px rgba(0,0,0,0.4);border-color:var(--accent)}
+    .newsletter-input{padding:12px 14px;border-radius:20px;border:2px solid rgba(255,255,255,0.1);background:rgba(20,20,35,0.8);color:#ffffff;font-size:15px;outline:none;max-width:520px;width:100%;min-height:44px;touch-action:manipulation;-webkit-appearance:none;appearance:none;}
+    .newsletter-input::placeholder{color:rgba(255,255,255,0.6)}
+    .newsletter-input:focus{box-shadow:0 6px 18px rgba(0,0,0,0.4);border-color:var(--accent);background:rgba(20,20,35,0.95)}
+    .newsletter-input::-webkit-autofill,
+    .newsletter-input::-webkit-autofill:hover,
+    .newsletter-input::-webkit-autofill:focus {
+      -webkit-box-shadow: 0 0 0 30px rgba(20,20,35,0.8) inset !important;
+      -webkit-text-fill-color: #ffffff !important;
+    }
     /* Use the same accent color as other buttons and make the button larger */
     .newsletter-btn{align-self:center;padding:14px 24px;border-radius:10px;background:var(--accent);color:#071428;font-weight:700;border:none;cursor:pointer;font-size:16px;min-width:220px;min-height:48px;box-shadow:0 6px 18px rgba(2,6,23,0.25);transition:transform .12s ease,filter .12s ease;touch-action:manipulation;-webkit-tap-highlight-color:transparent;}
     .newsletter-btn:hover{filter:brightness(0.98);transform:translateY(-1px)}
@@ -1165,11 +1172,11 @@
       <a href="https://www.standen.info/?ref=fikfak" target="_blank" rel="noopener noreferrer" class="newsletter-banner-link" style="display:block;max-width:90%;width:100%;">
         <picture>
           <!-- Mobile: Square banner for screens smaller than 768px -->
-          <source media="(max-width: 767px)" srcset="assets/images/modulaire (600 x 600 px).png">
+          <source media="(max-width: 767px)" srcset="assets/images/standen_info_square.png">
           <!-- Desktop: Landscape banner for screens 768px and larger -->
           <source media="(min-width: 768px)" srcset="assets/images/standen_info_leaderboard.png">
           <!-- Fallback for older browsers -->
-          <img src="assets/images/standen_info_leaderboard.png" alt="Standen.info Banner - FikFak News Partner" style="max-width:100%;height:auto;border-radius:8px;width:100%;display:block;" loading="lazy">
+          <img src="assets/images/standen_info_leaderboard.png" alt="Standen.info Banner - FikFak News Partner" style="border: solid 2px white;max-width:100%;height:auto;border-radius:8px;width:100%;display:block;" loading="lazy">
         </picture>
       </a>
     </div>
@@ -1215,8 +1222,61 @@
     color: #c0ccda;
   }
 
+  /* Style Brevo form inputs for better readability */
+  #sib-container input[type="text"],
+  #sib-container input[type="email"],
+  #sib-container textarea {
+    background-color: rgba(20,20,35,0.9) !important;
+    color: #ffffff !important;
+    border: 2px solid rgba(255,255,255,0.15) !important;
+    border-radius: 16px !important;
+    padding: 12px 16px !important;
+    font-size: 15px !important;
+    min-height: 44px !important;
+  }
+
+  #sib-container input[type="text"]::placeholder,
+  #sib-container input[type="email"]::placeholder,
+  #sib-container textarea::placeholder {
+    color: rgba(255,255,255,0.6) !important;
+  }
+
+  #sib-container input[type="text"]:focus,
+  #sib-container input[type="email"]:focus,
+  #sib-container textarea:focus {
+    border-color: var(--accent) !important;
+    box-shadow: 0 0 0 3px rgba(28,99,207,0.2) !important;
+    background-color: rgba(20,20,35,0.95) !important;
+  }
+
+  /* Fix autofill colors */
+  #sib-container input[type="text"]:-webkit-autofill,
+  #sib-container input[type="email"]:-webkit-autofill {
+    -webkit-box-shadow: 0 0 0 30px rgba(20,20,35,0.9) inset !important;
+    -webkit-text-fill-color: #ffffff !important;
+  }
+
   #sib-container a {
     text-decoration: underline;
+  }
+
+  /* Brevo form container styling */
+  #sib-form-container {
+    background: transparent !important;
+    padding: 0 !important;
+  }
+
+  #sib-container {
+    max-width: 600px !important;
+    margin: 0 auto !important;
+    background: linear-gradient(135deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01)) !important;
+    border: 1px solid rgba(255,255,255,0.1) !important;
+    border-radius: 20px !important;
+    padding: 24px 20px !important;
+  }
+
+  #sib-container--large {
+    padding: 24px !important;
     color: #2BB2FC;
   }
 </style>
@@ -1362,6 +1422,9 @@
           </a>
           <a href="https://www.youtube.com/@fikfakmaster" target="_blank" rel="noopener" class="social-link" aria-label="YouTube" title="YouTube">
             <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M23.5 6.2s-.2-1.6-.8-2.3c-.8-.9-1.7-.9-2.1-1C16.9 2.4 12 2.4 12 2.4h-.1s-4.9 0-7.5.5c-.4.1-1.3.1-2.1 1C1.6 4.6 1.5 6.2 1.5 6.2S1 8.1 1 10v1.9c0 1.9.5 3.8.5 3.8s.2 1.6.8 2.3c.8.9 1.9.8 2.4.9 1.7.2 7 .5 7.4.5h.1s4.9 0 7.5-.5c.4-.1 1.3-.1 2.1-1 .6-.6.8-2.3.8-2.3s.5-1.9.5-3.8V10c0-1.9-.5-3.8-.5-3.8zM9.8 15.1V8.9l6.1 3.1-6.1 3.1z"/></svg>
+          </a>
+          <a href="https://github.com/web-technics/fikfak-news" target="_blank" rel="noopener" class="social-link" aria-label="GitHub" title="GitHub">
+            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M12 2C6.477 2 2 6.477 2 12c0 4.42 2.865 8.17 6.839 9.49.5.092.682-.217.682-.482 0-.237-.008-.866-.013-1.7-2.782.603-3.369-1.34-3.369-1.34-.454-1.156-1.11-1.463-1.11-1.463-.908-.62.069-.608.069-.608 1.003.07 1.531 1.03 1.531 1.03.892 1.529 2.341 1.087 2.91.831.092-.646.35-1.086.636-1.336-2.22-.253-4.555-1.11-4.555-4.943 0-1.091.39-1.984 1.029-2.683-.103-.253-.446-1.27.098-2.647 0 0 .84-.269 2.75 1.025A9.578 9.578 0 0112 6.836c.85.004 1.705.114 2.504.336 1.909-1.294 2.747-1.025 2.747-1.025.546 1.377.203 2.394.1 2.647.64.699 1.028 1.592 1.028 2.683 0 3.842-2.339 4.687-4.566 4.935.359.309.678.919.678 1.852 0 1.336-.012 2.415-.012 2.743 0 .267.18.578.688.48C19.138 20.167 22 16.418 22 12c0-5.523-4.477-10-10-10z"/></svg>
           </a>
         </div>
       </div>
@@ -1667,7 +1730,8 @@
       const raw = CHANNEL_HANDLE.replace(/^@/, '').trim();
       const isChannelId = /^UC[A-Za-z0-9_-]{20,}$/i.test(raw);
       const feedParam = isChannelId ? 'channel_id=' + raw : 'user=' + raw;
-      const rssUrl = 'https://www.youtube.com/feeds/videos.xml?' + feedParam;
+      const cacheBust = '&_cb=' + Date.now();
+      const rssUrl = 'https://www.youtube.com/feeds/videos.xml?' + feedParam + cacheBust;
       const rssToJson = 'https://api.rss2json.com/v1/api.json?rss_url=' + encodeURIComponent(rssUrl);
       const allOriginsRaw = 'https://api.allorigins.win/raw?url=' + encodeURIComponent(rssUrl);
       const RECENT_COUNT = 5; // aantal recente uploads in de zijbalk
@@ -1768,6 +1832,9 @@
         if (watchOnYouTube) watchOnYouTube.href = 'https://www.youtube.com/watch?v=' + videoId;
         statusNote.textContent = 'Video geladen';
         currentVideoId = videoId;
+        
+        // Update social meta tags
+        updateSocialMetaTags(videoId, title, published);
       }
 
       // Fallback UI wanneer insluiten geblokkeerd is
@@ -1813,15 +1880,117 @@
         document.head.appendChild(tag);
       }
 
+      // Update social media meta tags for sharing
+      function updateSocialMetaTags(videoId, title, published) {
+        const videoUrl = 'https://www.youtube.com/watch?v=' + videoId;
+        const embedUrl = 'https://www.youtube.com/embed/' + videoId;
+        // Use hqdefault for best compatibility (always available, 480x360)
+        const thumbUrl = 'https://img.youtube.com/vi/' + videoId + '/hqdefault.jpg';
+        const pageUrl = 'https://go.fikfak.news/';
+        
+        // Update og:title
+        let ogTitle = document.querySelector('meta[property="og:title"]');
+        if (ogTitle) ogTitle.setAttribute('content', '📰 ' + title + ' | FikFak News');
+        
+        // Update og:description
+        let ogDesc = document.querySelector('meta[property="og:description"]');
+        if (ogDesc) ogDesc.setAttribute('content', '🎯 ' + title + ' - Bekijk de nieuwste FikFak News uitzending!');
+        
+        // Update og:image
+        let ogImage = document.querySelector('meta[property="og:image"]');
+        if (ogImage) ogImage.setAttribute('content', thumbUrl);
+        let ogImageSecure = document.querySelector('meta[property="og:image:secure_url"]');
+        if (ogImageSecure) ogImageSecure.setAttribute('content', thumbUrl);
+        
+        // Update image type and dimensions for YouTube thumbnail
+        let ogImageType = document.querySelector('meta[property="og:image:type"]');
+        if (ogImageType) ogImageType.setAttribute('content', 'image/jpeg');
+        let ogImageWidth = document.querySelector('meta[property="og:image:width"]');
+        if (ogImageWidth) ogImageWidth.setAttribute('content', '480');
+        let ogImageHeight = document.querySelector('meta[property="og:image:height"]');
+        if (ogImageHeight) ogImageHeight.setAttribute('content', '360');
+        let ogImageAlt = document.querySelector('meta[property="og:image:alt"]');
+        if (ogImageAlt) ogImageAlt.setAttribute('content', title + ' - FikFak News');
+        
+        // Update og:video
+        let ogVideo = document.querySelector('meta[property="og:video"]');
+        if (ogVideo) ogVideo.setAttribute('content', embedUrl);
+        
+        // Update Twitter card
+        let twitterTitle = document.querySelector('meta[name="twitter:title"]');
+        if (twitterTitle) twitterTitle.setAttribute('content', '📰 ' + title + ' | FikFak News');
+        let twitterDesc = document.querySelector('meta[name="twitter:description"]');
+        if (twitterDesc) twitterDesc.setAttribute('content', '🎯 ' + title);
+        let twitterImage = document.querySelector('meta[name="twitter:image"]');
+        if (twitterImage) twitterImage.setAttribute('content', thumbUrl);
+        let twitterPlayer = document.querySelector('meta[name="twitter:player"]');
+        if (twitterPlayer) twitterPlayer.setAttribute('content', embedUrl);
+        
+        // Update page title
+        document.title = '📰 ' + title + ' | FikFak News';
+        
+        console.log('✅ Social meta tags updated for:', title);
+        console.log('   Thumbnail:', thumbUrl);
+      }
+
       // Hoofdlogica: haal feed op en maak speler
       function initFromFeed() {
-        statusNote.textContent = 'Feed ophalen: ' + rssUrl;
+        statusNote.textContent = 'Feed ophalen...';
 
+        // First, try to load from latest-video.json (updated by cron job)
+        fetch('latest-video.json?' + Date.now())
+          .then(r => r.ok ? r.json() : null)
+          .then(latestData => {
+            if (latestData && latestData.videoId) {
+              console.log('✅ Loaded from latest-video.json:', latestData.videoId);
+              // Load this video and then fetch RSS in background for sidebar
+              loadMainVideo(latestData.videoId, latestData.title, latestData.published);
+              fetchRSSForSidebar();
+            } else {
+              // Fallback to RSS feed
+              fetchRSSFeed();
+            }
+          })
+          .catch(err => {
+            console.warn('latest-video.json not available, using RSS:', err);
+            fetchRSSFeed();
+          });
+      }
+
+      // Load main video
+      function loadMainVideo(videoId, title, published) {
+        loadYouTubeIframeAPI(() => createYTPlayer(videoId, title, published));
+      }
+
+      // Fetch RSS feed for sidebar only
+      function fetchRSSForSidebar() {
+        const handleItems = (items) => {
+          if (!items || items.length === 0) return;
+          recentList.innerHTML = '';
+          items.slice(0, RECENT_COUNT).forEach(it => {
+            const vid = extractVideoIdFromLink(it.link) || (it.guid && it.guid.split(':').pop());
+            addRecentItem(vid, it.title, it.pubDate);
+          });
+          statusNote.textContent = '';
+        };
+
+        fetchRSSData()
+          .then(handleItems)
+          .catch(err => {
+            console.warn('Could not load recent videos:', err);
+          });
+      }
+
+      // Fetch RSS feed (full flow)
+      function fetchRSSFeed() {
         const handleItems = (items) => {
           if (!items || items.length === 0) throw new Error('Geen items in feed');
+          
           const first = items[0];
           const id = extractVideoIdFromLink(first.link) || (first.guid && first.guid.split(':').pop());
           if (!id) throw new Error('Kon video-id niet uit feed halen');
+          
+          console.log('📺 RSS feed: loading', first.title);
 
           // recente items (limit)
           recentList.innerHTML = '';
@@ -1830,25 +1999,18 @@
             addRecentItem(vid, it.title, it.pubDate);
           });
 
-          // optioneel: controleer insluiting via YouTube Data API (als API-key aanwezig)
-          if (YOUTUBE_API_KEY && isChannelId) {
-            const url = 'https://www.googleapis.com/youtube/v3/videos?part=status&id=' + id + '&key=' + encodeURIComponent(YOUTUBE_API_KEY);
-            fetch(url).then(r => r.json()).then(json => {
-              const embeddable = json.items && json.items[0] && json.items[0].status && json.items[0].status.embeddable;
-              if (embeddable === false) {
-                showEmbedBlockedFallback(id, first.title, first.pubDate);
-              } else {
-                loadYouTubeIframeAPI(() => createYTPlayer(id, first.title, first.pubDate));
-              }
-            }).catch(err => {
-              console.warn('YouTube API-check mislukt, probeer insluiten', err);
-              loadYouTubeIframeAPI(() => createYTPlayer(id, first.title, first.pubDate));
-            });
-          } else {
-            loadYouTubeIframeAPI(() => createYTPlayer(id, first.title, first.pubDate));
-          }
+          // Load video
+          loadYouTubeIframeAPI(() => createYTPlayer(id, first.title, first.pubDate));
         };
 
+        fetchRSSData().then(handleItems).catch(err => {
+          console.error('RSS feed failed:', err);
+          statusNote.innerHTML = '<div class="error">Kon de feed niet ophalen</div>';
+        });
+      }
+
+      // Helper function to fetch RSS data
+      function fetchRSSData() {
         // Helper: add timeout to fetch
         const fetchWithTimeout = (url, timeout = 5000) => {
           return Promise.race([
@@ -1892,7 +2054,7 @@
         };
 
         // Race both APIs - whoever responds first wins
-        Promise.race([
+        return Promise.race([
           fetchXmlFeed().catch(err => {
             console.info('AllOrigins failed:', err.message);
             throw err;
@@ -1902,22 +2064,13 @@
             throw err;
           })
         ])
-          .then(handleItems)
           .catch(() => {
             // If both fail in race, try them sequentially as fallback
             console.info('Both APIs slow/failed, trying sequential fallback...');
             return fetchJsonFeed()
-              .then(handleItems)
               .catch(err => {
-                return fetchXmlFeed().then(handleItems);
+                return fetchXmlFeed();
               });
-          })
-          .catch(err2 => {
-            console.error('Alle feedpogingen mislukt:', err2);
-            statusNote.innerHTML = '<div class="error">Kon de feed niet ophalen. Er wordt een voorbeeldvideo weergegeven. Controleer het kanaal of gebruik een kanaal-id. Fout in console.</div>';
-            const fallbackId = 'M7lc1UVf-VE';
-            showEmbedBlockedFallback(fallbackId, 'Voorbeeldvideo', '');
-            recentList.innerHTML = '<div class="muted">Recente video niet beschikbaar.</div>';
           });
       }
 

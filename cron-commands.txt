@@ -1,0 +1,3 @@
+# FikFak News - Auto-update video every 30 seconds on Sunday 7-8am
+* 7-8 * * 0 sleep 0 && /usr/bin/php /home/fikfak-go/htdocs/go.fikfak.news/update-latest-video.php >> /home/fikfak-go/htdocs/go.fikfak.news/cron.log 2>&1
+* 7-8 * * 0 sleep 30 && /usr/bin/php /home/fikfak-go/htdocs/go.fikfak.news/update-latest-video.php >> /home/fikfak-go/htdocs/go.fikfak.news/cron.log 2>&1
