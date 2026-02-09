@@ -19,7 +19,8 @@ function getLatestVideoFromAPI($channelId, $apiKey) {
         return null;
     }
     
-    $url = "https://www.googleapis.com/youtube/v3/search?key={$apiKey}&channelId={$channelId}&part=snippet&order=date&maxResults=1&type=video";
+    // Fetch multiple videos (10) for sidebar
+    $url = "https://www.googleapis.com/youtube/v3/search?key={$apiKey}&channelId={$channelId}&part=snippet&order=date&maxResults=10&type=video";
     
     $json = @file_get_contents($url);
     if ($json === false) {
@@ -33,11 +34,21 @@ function getLatestVideoFromAPI($channelId, $apiKey) {
         return null;
     }
     
-    $video = $data['items'][0];
+    // Return array of videos
+    $videos = [];
+    foreach ($data['items'] as $item) {
+        $videos[] = [
+            'videoId' => $item['id']['videoId'],
+            'title' => $item['snippet']['title'],
+            'published' => $item['snippet']['publishedAt']
+        ];
+    }
+    
     return [
-        'videoId' => $video['id']['videoId'],
-        'title' => $video['snippet']['title'],
-        'published' => $video['snippet']['publishedAt'],
+        'videoId' => $videos[0]['videoId'],
+        'title' => $videos[0]['title'],
+        'published' => $videos[0]['published'],
+        'recentVideos' => $videos,
         'lastUpdated' => date('c')
     ];
 }
@@ -61,25 +72,35 @@ function getLatestVideoFromRSS($channelId) {
     $feed->registerXPathNamespace('atom', 'http://www.w3.org/2005/Atom');
     $feed->registerXPathNamespace('yt', 'http://www.youtube.com/xml/schemas/2015');
     
-    // Get first entry
+    // Get all entries (typically 15)
     $entries = $feed->xpath('//atom:entry');
     if (empty($entries)) {
         error_log("No entries found in RSS feed");
         return null;
     }
     
-    $entry = $entries[0];
-    $entry->registerXPathNamespace('atom', 'http://www.w3.org/2005/Atom');
-    $entry->registerXPathNamespace('yt', 'http://www.youtube.com/xml/schemas/2015');
-    
-    $videoId = (string)$entry->xpath('yt:videoId')[0];
-    $title = (string)$entry->xpath('atom:title')[0];
-    $published = (string)$entry->xpath('atom:published')[0];
+    // Parse multiple videos for sidebar
+    $videos = [];
+    foreach ($entries as $entry) {
+        $entry->registerXPathNamespace('atom', 'http://www.w3.org/2005/Atom');
+        $entry->registerXPathNamespace('yt', 'http://www.youtube.com/xml/schemas/2015');
+        
+        $videoId = (string)$entry->xpath('yt:videoId')[0];
+        $title = (string)$entry->xpath('atom:title')[0];
+        $published = (string)$entry->xpath('atom:published')[0];
+        
+        $videos[] = [
+            'videoId' => $videoId,
+            'title' => $title,
+            'published' => $published
+        ];
+    }
     
     return [
-        'videoId' => $videoId,
-        'title' => $title,
-        'published' => $published,
+        'videoId' => $videos[0]['videoId'],
+        'title' => $videos[0]['title'],
+        'published' => $videos[0]['published'],
+        'recentVideos' => $videos,
         'lastUpdated' => date('c')
     ];
 }
@@ -127,16 +148,35 @@ if ($latestVideo === null) {
     exit(1);
 }
 
-// Check if video ID has changed
-if ($currentData === null || $currentData['videoId'] !== $latestVideo['videoId']) {
-    // New video detected - update JSON file
+// Check if video ID has changed or if we need to update recentVideos
+$needsUpdate = false;
+$updateReason = '';
+
+if ($currentData === null) {
+    $needsUpdate = true;
+    $updateReason = 'Initial creation';
+} elseif ($currentData['videoId'] !== $latestVideo['videoId']) {
+    $needsUpdate = true;
+    $updateReason = 'New video detected';
+} elseif (!isset($currentData['recentVideos']) || empty($currentData['recentVideos'])) {
+    $needsUpdate = true;
+    $updateReason = 'Adding recentVideos to cache';
+} elseif (count($currentData['recentVideos']) !== count($latestVideo['recentVideos'])) {
+    $needsUpdate = true;
+    $updateReason = 'Video count changed';
+}
+
+if ($needsUpdate) {
+    // New video detected or cache needs update - update JSON file
     file_put_contents($jsonFile, json_encode($latestVideo, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
-    error_log("✅ Updated to new video: {$latestVideo['videoId']} - {$latestVideo['title']}");
+    error_log("✅ Updated JSON: {$updateReason} - {$latestVideo['videoId']} - {$latestVideo['title']}");
     
-    // Also update the meta tags in index.html
-    updateIndexHtmlMetaTags($latestVideo['videoId'], $latestVideo['title']);
+    // Also update the meta tags in index.html if video changed
+    if ($currentData === null || $currentData['videoId'] !== $latestVideo['videoId']) {
+        updateIndexHtmlMetaTags($latestVideo['videoId'], $latestVideo['title']);
+    }
     
-    echo "SUCCESS: Updated to video {$latestVideo['videoId']}\n";
+    echo "SUCCESS: Updated JSON ($updateReason) - video {$latestVideo['videoId']}\n";
 } else {
     echo "INFO: No change, still on video {$latestVideo['videoId']}\n";
 }

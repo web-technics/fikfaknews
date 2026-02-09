@@ -1064,7 +1064,7 @@
       </div>
 
       <aside class="sidebar" role="complementary" aria-labelledby="recent-videos-heading">
-        <h2 id="recent-videos-heading" style="font-weight:700;font-size:16px;margin:0 0 12px;">Recente uploads</h2>
+        <h2 id="recent-videos-heading" class="sr-only">Recente uploads</h2>
         <div id="recent-list" role="list" aria-label="Lijst met recente video uploads">
           <!-- thumbnails komen hier -->
         </div>
@@ -1081,8 +1081,10 @@
       <a href="https://www.opdatemetjezelf.be/shop" target="_blank" rel="noopener noreferrer" class="newsletter-banner-link" aria-label="Bezoek Op Dat Met Jezelf shop - FikFak News sponsor" style="display:block;max-width:90%;width:100%;">
         <picture>
           <!-- Mobile: Square banner for screens smaller than 768px -->
+          <source media="(max-width: 767px)" type="image/webp" srcset="assets/images/gadgets_fikfak_leaderboard_square.webp">
           <source media="(max-width: 767px)" srcset="assets/images/gadgets_fikfak_leaderboard_square.png">
           <!-- Desktop: Landscape banner for screens 768px and larger -->
+          <source media="(min-width: 768px)" type="image/webp" srcset="assets/images/gadgets_fikfak_leaderboard.webp">
           <source media="(min-width: 768px)" srcset="assets/images/gadgets_fikfak_leaderboard.png">
           <!-- Fallback for older browsers -->
           <img src="assets/images/gadgets_fikfak_leaderboard.png" alt="FikFak News Leaderboard" style="border: solid 2px white;max-width:100%;height:auto;border-radius:8px;width:100%;display:block;" loading="lazy">
@@ -1125,19 +1127,10 @@
     <!-- AWARD FEATURE SECTION -->
     <section id="live-edition" class="video-card" style="margin:32px auto 24px auto;max-width:var(--max-width);background:transparent;border:none;box-shadow:none;">
       <div class="award-grid" style="position:relative;width:100%;background:transparent;border-radius:10px;overflow:hidden;display:flex;align-items:center;justify-content:center;min-height:500px;">
-        <img src="assets/images/Dirk-Theuns-winnaar-beste-journalist-2025-tScheldt-7-.png" alt="Dirk Theuns gevierd als winnaar Beste Journalist 2025 - Prijs uitgereikt door tScheldt, gesponsord door Armand.Gold" style="width:100%;height:100%;display:block;border-radius:8px;object-fit:contain;padding:12px;position:absolute;inset:0;" loading="lazy" width="1000" height="600">
-        <div class="award-text" style="position:absolute;bottom:0;left:0;right:0;background:transparent;padding:32px 24px;backdrop-filter:blur(2px);z-index:10;">
-          <div style="font-weight:800;letter-spacing:0.08em;color:#fff;font-size:12px;margin-bottom:8px;">WINNAAR</div>
-          <h2 style="margin:0 0 10px 0;font-size:26px;line-height:1.15;color:#fff;">BESTE JOURNALIST 2025<br>DIRK THEUNS</h2>
-          <p style="margin:0 0 14px 0;color:#e6eef6;font-size:14px;line-height:1.6;">
-            PRIJS 'BESTE JOURNALIST 2025'<br>
-            EEN ORGANISATIE VAN 'TSCHELDT <a href="https://www.tscheldt.be" target="_blank" rel="noopener noreferrer" style="color:var(--accent);text-decoration:none;font-weight:600;">WWW.TSCHELDT.BE</a>
-          </p>
-          <p style="margin:0 0 14px 0;color:#e6eef6;font-size:14px;line-height:1.6;">
-            SPONSOR: <a href="https://www.armand.gold?ref=fikfak" target="_blank" rel="noopener noreferrer" style="color:var(--accent);text-decoration:none;font-weight:600;">WWW.ARMAND.GOLD</a>
-          </p>
-          <p style="margin:0;font-weight:700;color:#fff;">Bedankt fikfakkers!!!!!</p>
-        </div>
+        <picture>
+          <source type="image/webp" srcset="assets/images/Dirk-Theuns-winnaar-beste-journalist-2025-tScheldt-7.webp">
+          <img src="assets/images/Dirk-Theuns-winnaar-beste-journalist-2025-tScheldt-7.png" alt="Dirk Theuns - Winnaar Beste Journalist 2025" style="width:100%;height:100%;display:block;border-radius:8px;object-fit:contain;padding:12px;" loading="lazy" width="1600" height="960">
+        </picture>
       </div>
       <style>
         @media (max-width: 768px) {
@@ -1172,8 +1165,10 @@
       <a href="https://www.standen.info/?ref=fikfak" target="_blank" rel="noopener noreferrer" class="newsletter-banner-link" style="display:block;max-width:90%;width:100%;">
         <picture>
           <!-- Mobile: Square banner for screens smaller than 768px -->
+          <source media="(max-width: 767px)" type="image/webp" srcset="assets/images/standen_info_square.webp">
           <source media="(max-width: 767px)" srcset="assets/images/standen_info_square.png">
           <!-- Desktop: Landscape banner for screens 768px and larger -->
+          <source media="(min-width: 768px)" type="image/webp" srcset="assets/images/standen_info_leaderboard.webp">
           <source media="(min-width: 768px)" srcset="assets/images/standen_info_leaderboard.png">
           <!-- Fallback for older browsers -->
           <img src="assets/images/standen_info_leaderboard.png" alt="Standen.info Banner - FikFak News Partner" style="border: solid 2px white;max-width:100%;height:auto;border-radius:8px;width:100%;display:block;" loading="lazy">
@@ -1809,6 +1804,8 @@
       // Simple iframe embed for Safari Mac (more reliable than YouTube IFrame API)
       function createSimpleIframeEmbed(videoId, title, published) {
         playerContainer.innerHTML = '';
+        statusNote.textContent = 'Video wordt geladen...';
+        
         const iframe = document.createElement('iframe');
         iframe.id = 'yt-embed-iframe';
         iframe.width = '100%';
@@ -1825,12 +1822,36 @@
         iframe.style.left = '0';
         iframe.style.width = '100%';
         iframe.style.height = '100%';
+        
+        // Add load and error handlers
+        let loadTimeout = setTimeout(() => {
+          console.warn('Video iframe took too long to load, may have connectivity issues');
+          statusNote.innerHTML = '<div class="warning" style="color: #ff9800;">Video laadt langzaam... Even geduld. <a href="https://www.youtube.com/watch?v=' + videoId + '" target="_blank" rel="noopener" style="color: #ff9800; text-decoration: underline;">Open op YouTube</a></div>';
+        }, 8000);
+        
+        iframe.addEventListener('load', () => {
+          clearTimeout(loadTimeout);
+          statusNote.textContent = 'Video geladen';
+          console.log('✅ Video iframe loaded successfully');
+          // Hide status note after a moment
+          setTimeout(() => {
+            if (statusNote.textContent === 'Video geladen') {
+              statusNote.textContent = '';
+            }
+          }, 2000);
+        });
+        
+        iframe.addEventListener('error', (e) => {
+          clearTimeout(loadTimeout);
+          console.error('Video iframe failed to load:', e);
+          statusNote.innerHTML = '<div class="error">Video kon niet worden geladen. <a href="https://www.youtube.com/watch?v=' + videoId + '" target="_blank" rel="noopener">Open op YouTube</a></div>';
+        });
+        
         playerContainer.appendChild(iframe);
         
         titleEl.textContent = title || 'Nieuwste video';
         dateEl.textContent = toNLDate(published);
         if (watchOnYouTube) watchOnYouTube.href = 'https://www.youtube.com/watch?v=' + videoId;
-        statusNote.textContent = 'Video geladen';
         currentVideoId = videoId;
         
         // Update social meta tags
@@ -1937,22 +1958,48 @@
       function initFromFeed() {
         statusNote.textContent = 'Feed ophalen...';
 
-        // First, try to load from latest-video.json (updated by cron job)
-        fetch('latest-video.json?' + Date.now())
+        // First, try to load from latest-video.json (updated by cron job) with longer timeout
+        const fetchWithTimeout = (url, timeout = 8000) => {
+          return Promise.race([
+            fetch(url),
+            new Promise((_, reject) => 
+              setTimeout(() => reject(new Error('latest-video.json timeout')), timeout)
+            )
+          ]);
+        };
+        
+        fetchWithTimeout('latest-video.json?' + Date.now())
           .then(r => r.ok ? r.json() : null)
           .then(latestData => {
             if (latestData && latestData.videoId) {
               console.log('✅ Loaded from latest-video.json:', latestData.videoId);
-              // Load this video and then fetch RSS in background for sidebar
+              
+              // Load main video
               loadMainVideo(latestData.videoId, latestData.title, latestData.published);
-              fetchRSSForSidebar();
+              
+              // Populate sidebar from cached recentVideos if available
+              if (latestData.recentVideos && Array.isArray(latestData.recentVideos) && latestData.recentVideos.length > 0) {
+                console.log('✅ Populating sidebar from cached data (' + latestData.recentVideos.length + ' videos)');
+                recentList.innerHTML = '';
+                latestData.recentVideos.slice(0, RECENT_COUNT).forEach(video => {
+                  if (video.videoId) {
+                    addRecentItem(video.videoId, video.title, video.published);
+                  }
+                });
+                statusNote.textContent = '';
+              } else {
+                // Fallback: fetch RSS for sidebar if recentVideos not in cache
+                console.log('⚠️ No recentVideos in cache, fetching RSS for sidebar');
+                fetchRSSForSidebar();
+              }
             } else {
+              console.warn('latest-video.json returned invalid data, using RSS');
               // Fallback to RSS feed
               fetchRSSFeed();
             }
           })
           .catch(err => {
-            console.warn('latest-video.json not available, using RSS:', err);
+            console.warn('latest-video.json not available or timed out, using RSS:', err.message);
             fetchRSSFeed();
           });
       }
@@ -1965,19 +2012,29 @@
       // Fetch RSS feed for sidebar only
       function fetchRSSForSidebar() {
         const handleItems = (items) => {
-          if (!items || items.length === 0) return;
+          if (!items || items.length === 0) {
+            console.warn('No items received for sidebar');
+            return;
+          }
           recentList.innerHTML = '';
           items.slice(0, RECENT_COUNT).forEach(it => {
             const vid = extractVideoIdFromLink(it.link) || (it.guid && it.guid.split(':').pop());
-            addRecentItem(vid, it.title, it.pubDate);
+            if (vid) {
+              addRecentItem(vid, it.title, it.pubDate);
+            }
           });
-          statusNote.textContent = '';
+          console.log('✅ Sidebar loaded with', items.slice(0, RECENT_COUNT).length, 'videos');
         };
 
+        console.log('📥 Fetching RSS data for sidebar...');
         fetchRSSData()
           .then(handleItems)
           .catch(err => {
-            console.warn('Could not load recent videos:', err);
+            console.error('❌ Could not load recent videos for sidebar:', err);
+            // Show a message in the sidebar area
+            if (recentList) {
+              recentList.innerHTML = '<div style="padding: 12px; color: var(--muted); font-size: 13px; text-align: center;">Recent videos konden niet worden geladen.<br><a href="https://www.youtube.com/@fikfakmaster/videos" target="_blank" rel="noopener" style="color: var(--primary); text-decoration: underline;">Bekijk op YouTube</a></div>';
+            }
           });
       }
 
@@ -2004,15 +2061,17 @@
         };
 
         fetchRSSData().then(handleItems).catch(err => {
-          console.error('RSS feed failed:', err);
-          statusNote.innerHTML = '<div class="error">Kon de feed niet ophalen</div>';
+          console.error('RSS feed failed after all retries:', err);
+          statusNote.innerHTML = '<div class="error">Kon de feed niet ophalen. <a href="https://www.youtube.com/@fikfakmaster" target="_blank" rel="noopener">Bezoek het YouTube-kanaal direct</a></div>';
         });
       }
 
-      // Helper function to fetch RSS data
-      function fetchRSSData() {
-        // Helper: add timeout to fetch
-        const fetchWithTimeout = (url, timeout = 5000) => {
+      // Helper function to fetch RSS data with retry logic
+      function fetchRSSData(retryCount = 0, maxRetries = 3) {
+        console.log(`🔄 fetchRSSData called (attempt ${retryCount + 1}/${maxRetries + 1})`);
+        
+        // Helper: add timeout to fetch with longer timeout for reliability
+        const fetchWithTimeout = (url, timeout = 10000) => {
           return Promise.race([
             fetch(url),
             new Promise((_, reject) => 
@@ -2022,7 +2081,8 @@
         };
 
         const fetchXmlFeed = () => {
-          return fetchWithTimeout(allOriginsRaw, 5000)
+          console.log('🔷 Trying AllOrigins XML feed...');
+          return fetchWithTimeout(allOriginsRaw, 10000)
             .then(r => {
               if (!r.ok) throw new Error('allorigins ophalen mislukt: ' + r.status);
               return r.text();
@@ -2032,6 +2092,7 @@
               const xml = parser.parseFromString(xmlText, 'application/xml');
               const entries = Array.from(xml.querySelectorAll('entry'));
               if (entries.length === 0) throw new Error('Geen items in XML-feed');
+              console.log('✅ AllOrigins returned', entries.length, 'entries');
               return entries.map(e => {
                 const link = e.querySelector('link')?.getAttribute('href') || '';
                 const title = e.querySelector('title')?.textContent || '';
@@ -2042,13 +2103,15 @@
         };
 
         const fetchJsonFeed = () => {
-          return fetchWithTimeout(rssToJson, 5000)
+          console.log('🔶 Trying RSS2JSON feed...');
+          return fetchWithTimeout(rssToJson, 10000)
             .then(r => {
               if (!r.ok) throw new Error('rss2json ophalen mislukt: ' + r.status);
               return r.json();
             })
             .then(data => {
               if (!data || !data.items) throw new Error('Geen items in JSON-feed');
+              console.log('✅ RSS2JSON returned', data.items.length, 'items');
               return data.items;
             });
         };
@@ -2071,6 +2134,16 @@
               .catch(err => {
                 return fetchXmlFeed();
               });
+          })
+          .catch(err => {
+            // Retry logic with exponential backoff
+            if (retryCount < maxRetries) {
+              const delay = Math.min(1000 * Math.pow(2, retryCount), 5000);
+              console.warn(`Retry ${retryCount + 1}/${maxRetries} after ${delay}ms...`);
+              return new Promise(resolve => setTimeout(resolve, delay))
+                .then(() => fetchRSSData(retryCount + 1, maxRetries));
+            }
+            throw err;
           });
       }
 
