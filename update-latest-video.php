@@ -48,7 +48,7 @@ function getLatestVideoFromAPI($channelId, $apiKey) {
         'videoId' => $videos[0]['videoId'],
         'title' => $videos[0]['title'],
         'published' => $videos[0]['published'],
-        'recentVideos' => $videos,
+        'recentVideos' => array_slice($videos, 1), // Skip first video (already in player)
         'lastUpdated' => date('c')
     ];
 }
@@ -100,7 +100,7 @@ function getLatestVideoFromRSS($channelId) {
         'videoId' => $videos[0]['videoId'],
         'title' => $videos[0]['title'],
         'published' => $videos[0]['published'],
-        'recentVideos' => $videos,
+        'recentVideos' => array_slice($videos, 1), // Skip first video (already in player)
         'lastUpdated' => date('c')
     ];
 }

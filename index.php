@@ -1,3 +1,29 @@
+<?php
+// Dynamic Meta Tags for Latest Video
+$latestVideoFile = __DIR__ . '/latest-video.json';
+$videoData = [
+    'videoId' => '_zmNgTiLmWo',
+    'title' => 'FikFak News Uitzending',
+    'published' => '2026-01-05T00:00:00+00:00'
+];
+
+if (file_exists($latestVideoFile)) {
+    $json = @file_get_contents($latestVideoFile);
+    if ($json) {
+        $decoded = @json_decode($json, true);
+        if ($decoded && isset($decoded['videoId'])) {
+            $videoData = [
+                'videoId' => $decoded['videoId'],
+                'title' => isset($decoded['title']) ? $decoded['title'] : 'FikFak News Uitzending',
+                'published' => isset($decoded['published']) ? $decoded['published'] : date('c')
+            ];
+        }
+    }
+}
+
+error_reporting(E_ALL);
+ini_set('display_errors', 0);
+?>
 <!doctype html>
 <html lang="nl">
 <head>
@@ -34,17 +60,17 @@
   <meta property="og:type" content="website" />
   <meta property="og:url" content="https://go.fikfak.news/" />
   <meta property="og:site_name" content="FikFak News" />
-  <meta property="og:title" content="📰 FikFak News — Alternatief Nieuws & Actuele Analyse" />
-  <meta property="og:description" content="🎯 De nieuwste FikFak News uitzending! Onafhankelijk nieuws met kritische blik op media en politiek door winnaar Beste Journalist 2025 Dirk Theuns. Nagels met koppen slaan! 🔥" />
-  <meta property="og:image" content="https://img.youtube.com/vi/3UEf4G1eVtA/hqdefault.jpg" />
-  <meta property="og:image:secure_url" content="https://img.youtube.com/vi/3UEf4G1eVtA/hqdefault.jpg" />
+  <meta property="og:title" content="📰 <?php echo htmlspecialchars($videoData['title'], ENT_QUOTES, 'UTF-8'); ?> | FikFak News" />
+  <meta property="og:description" content="🎯 Bekijk de nieuwste FikFak News uitzending! Onafhankelijk nieuws, actuele analyse en kritische blik op media en politiek door journalist Dirk Theuns. Winnaar Beste Journalist 2025. 🔥" />
+  <meta property="og:image" content="https://img.youtube.com/vi/<?php echo htmlspecialchars($videoData['videoId'], ENT_QUOTES, 'UTF-8'); ?>/hqdefault.jpg" />
+  <meta property="og:image:secure_url" content="https://img.youtube.com/vi/<?php echo htmlspecialchars($videoData['videoId'], ENT_QUOTES, 'UTF-8'); ?>/hqdefault.jpg" />
   <meta property="og:image:type" content="image/jpeg" />
   <meta property="og:image:width" content="480" />
   <meta property="og:image:height" content="360" />
   <meta property="og:image:alt" content="FikFak News - Nieuwste uitzending" />
   <meta property="og:locale" content="nl_NL" />
   <meta property="og:locale:alternate" content="nl_BE" />
-  <meta property="og:video" content="https://www.youtube.com/embed/3UEf4G1eVtA" />
+  <meta property="og:video" content="https://www.youtube.com/embed/<?php echo htmlspecialchars($videoData['videoId'], ENT_QUOTES, 'UTF-8'); ?>" />
   <meta property="og:video:type" content="text/html" />
   <meta property="og:video:width" content="1280" />
   <meta property="og:video:height" content="720" />
@@ -61,16 +87,16 @@
   <meta name="twitter:site" content="@dirktheuns" />
   <meta name="twitter:creator" content="@dirktheuns" />
   <meta name="twitter:url" content="https://go.fikfak.news/" />
-  <meta name="twitter:title" content="📰 FikFak News — Alternatief Nieuws & Actuele Analyse" />
-  <meta name="twitter:description" content="🎯 De nieuwste FikFak News uitzending! Onafhankelijk nieuws met kritische blik op media en politiek door winnaar Beste Journalist 2025 Dirk Theuns. 🔥" />
-  <meta name="twitter:image" content="https://img.youtube.com/vi/3UEf4G1eVtA/hqdefault.jpg" />
+  <meta name="twitter:title" content="📰 <?php echo htmlspecialchars($videoData['title'], ENT_QUOTES, 'UTF-8'); ?> | FikFak News" />
+  <meta name="twitter:description" content="🎯 Bekijk de nieuwste FikFak News uitzending! Onafhankelijk nieuws, actuele analyse en kritische blik op media en politiek door journalist Dirk Theuns. Winnaar Beste Journalist 2025. 🔥" />
+  <meta name="twitter:image" content="https://img.youtube.com/vi/<?php echo htmlspecialchars($videoData['videoId'], ENT_QUOTES, 'UTF-8'); ?>/hqdefault.jpg" />
   <meta name="twitter:image:alt" content="FikFak News - Onafhankelijk nieuws" />
-  <meta name="twitter:player" content="https://www.youtube.com/embed/3UEf4G1eVtA" />
+  <meta name="twitter:player" content="https://www.youtube.com/embed/<?php echo htmlspecialchars($videoData['videoId'], ENT_QUOTES, 'UTF-8'); ?>" />
   <meta name="twitter:player:width" content="1280" />
   <meta name="twitter:player:height" content="720" />
   
   <!-- WhatsApp Specific Optimization -->
-  <meta property="og:updated_time" content="2026-01-05T00:00:00+00:00" />
+  <meta property="og:updated_time" content="<?php echo htmlspecialchars($videoData['published'], ENT_QUOTES, 'UTF-8'); ?>" />
   <meta property="og:see_also" content="https://fikfak.news/" />
   <meta property="og:see_also" content="https://www.youtube.com/@fikfakmaster" />
   
@@ -81,10 +107,7 @@
   <link rel="canonical" href="https://go.fikfak.news/" />
   
   <!-- Favicon & App Icons -->
-  <link rel="icon" type="image/x-icon" href="assets/favicons/favicon.ico" />
-  <link rel="icon" type="image/png" sizes="32x32" href="assets/favicons/favicon-32x32.png" />
-  <link rel="icon" type="image/png" sizes="16x16" href="assets/favicons/favicon-16x16.png" />
-  <link rel="apple-touch-icon" sizes="180x180" href="assets/favicons/apple-touch-icon.png" />
+  <link rel="icon" type="image/png" href="assets/favicons/favicon.png" />
   <link rel="manifest" href="assets/favicons/site.webmanifest" />
   
   <!-- Android Chrome Icons -->
@@ -640,9 +663,9 @@
     #loading-screen{position:fixed;inset:0;background:linear-gradient(135deg,#071028 0%,#0a1a2f 50%,#071b2b 100%);z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;opacity:1;transition:opacity 0.6s ease,visibility 0.6s ease}
     #loading-screen.loaded{opacity:0;visibility:hidden}
     .loading-content{text-align:center;position:relative}
-    .loading-logo{width:120px;height:120px;margin:0 auto 30px;position:relative;animation:pulse 2s ease-in-out infinite}
-    .loading-logo svg{width:100%;height:100%;fill:#1c63cf;filter:drop-shadow(0 8px 24px rgba(28,99,207,0.4))}
-    @keyframes pulse{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.05);opacity:0.9}}
+    .loading-logo{width:140px;height:140px;margin:0 auto 30px;position:relative;animation:logoSpin 3s ease-in-out infinite}
+    .loading-logo img{width:100%;height:100%;object-fit:contain;filter:drop-shadow(0 8px 32px rgba(28,99,207,0.5))}
+    @keyframes logoSpin{0%{transform:rotate(0deg) scale(1)}25%{transform:rotate(5deg) scale(1.05)}50%{transform:rotate(0deg) scale(1.08)}75%{transform:rotate(-5deg) scale(1.05)}100%{transform:rotate(0deg) scale(1)}}
     .loading-text{color:#e6eef6;font-size:24px;font-weight:700;margin-bottom:12px;letter-spacing:1px}
     .loading-subtext{color:#9aa4b2;font-size:14px;margin-bottom:30px;font-weight:500}
     .loading-bar-container{width:240px;height:3px;background:rgba(255,255,255,0.05);border-radius:10px;overflow:hidden;margin:0 auto;position:relative}
@@ -672,6 +695,7 @@
       nav ul li:nth-child(2) picture img { height:40px; }
       nav ul li:last-child { order:3; text-align:center; flex:none; }
     }
+
     
     @media (max-width: 640px) {
       nav ul li:first-child { gap:12px; }
@@ -1002,10 +1026,10 @@
   <div id="loading-screen" role="status" aria-live="polite" aria-label="Pagina wordt geladen">
     <div class="loading-content">
       <div class="loading-logo" aria-hidden="true">
-        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-          <path d="M21 5c-1.11-.35-2.33-.5-3.5-.5-1.95 0-4.05.4-5.5 1.5-1.45-1.1-3.55-1.5-5.5-1.5S2.45 4.9 1 6v14.65c0 .25.25.5.5.5.1 0 .15-.05.25-.05C3.1 20.45 5.05 20 6.5 20c1.95 0 4.05.4 5.5 1.5 1.35-.85 3.8-1.5 5.5-1.5 1.65 0 3.35.3 4.75 1.05.1.05.15.05.25.05.25 0 .5-.25.5-.5V6c-.6-.45-1.25-.75-2-1zm0 13.5c-1.1-.35-2.3-.5-3.5-.5-1.7 0-4.15.65-5.5 1.5V8c1.35-.85 3.8-1.5 5.5-1.5 1.2 0 2.4.15 3.5.5v11.5z"/>
-          <path d="M17.5 10.5c.88 0 1.73.09 2.5.26V9.24c-.79-.15-1.64-.24-2.5-.24-.69 0-1.52.06-2.5.24v1.52c.98-.18 1.81-.26 2.5-.26zM13 12.49v1.53c.98-.17 1.81-.26 2.5-.26.88 0 1.73.09 2.5.26V12.5c-.79-.15-1.64-.24-2.5-.24-.69 0-1.52.06-2.5.23zM17.5 14.75c-.69 0-1.52.06-2.5.24v1.52c.98-.18 1.81-.26 2.5-.26.88 0 1.73.09 2.5.26v-1.52c-.79-.15-1.64-.24-2.5-.24z"/>
-        </svg>
+        <picture>
+          <source type="image/webp" srcset="assets/images/logo-fikfak.webp">
+          <img src="assets/images/logo fikfak.png" alt="" loading="eager">
+        </picture>
       </div>
       <div class="loading-text">FIKFAK NEWS</div>
       <div class="loading-subtext">Onafhankelijk Nieuws Laden...</div>
@@ -1102,7 +1126,6 @@
       </aside>
     </div>
     </main>
-
         <!-- Standen.info Banner -->
     <div style="text-align:center;margin-bottom:20px;display:flex;justify-content:center;">
       <a href="https://www.opdatemetjezelf.be/shop" target="_blank" rel="noopener noreferrer" class="newsletter-banner-link" aria-label="Bezoek Op Dat Met Jezelf shop - FikFak News sponsor" style="display:block;max-width:90%;width:100%;">
@@ -1154,6 +1177,7 @@
     <!-- AWARD FEATURE SECTION -->
     <section id="live-edition" class="video-card" style="margin:32px auto 24px auto;max-width:var(--max-width);background:transparent;border:none;box-shadow:none;">
       <div class="award-grid" style="position:relative;width:100%;background:transparent;border-radius:10px;overflow:hidden;display:flex;align-items:center;justify-content:center;min-height:500px;">
+        <a href="https://www.tscheldt.be/speech-van-dirk-theuns-fikfak-news-nav-de-uitreiking-eerste-prijs-voor-beste-journalist-2025/" target="_blank" rel="noopener noreferrer" style="display:block;width:100%;height:100%;">
         <picture>
           <!-- Mobile/Tablet: Square award image for screens smaller than 768px -->
           <source media="(max-width: 767px)" type="image/webp" srcset="assets/images/award-beste-journalist-2025-square.webp">
@@ -1164,6 +1188,7 @@
           <!-- Fallback for older browsers -->
           <img src="assets/images/Dirk-Theuns-winnaar-beste-journalist-2025-tScheldt-7.png" alt="Dirk Theuns - Winnaar Beste Journalist 2025" style="width:100%;height:100%;display:block;border-radius:8px;object-fit:contain;padding:12px;" loading="lazy" width="1600" height="960">
         </picture>
+        </a>
       </div>
       <style>
         @media (max-width: 768px) {
@@ -2014,11 +2039,14 @@
               if (latestData.recentVideos && Array.isArray(latestData.recentVideos) && latestData.recentVideos.length > 0) {
                 console.log('✅ Populating sidebar from cached data (' + latestData.recentVideos.length + ' videos)');
                 recentList.innerHTML = '';
-                latestData.recentVideos.slice(0, RECENT_COUNT).forEach(video => {
-                  if (video.videoId) {
+                let count = 0;
+                for (const video of latestData.recentVideos) {
+                  if (video.videoId && video.videoId !== latestData.videoId) {
                     addRecentItem(video.videoId, video.title, video.published);
+                    count++;
+                    if (count >= RECENT_COUNT) break;
                   }
-                });
+                }
                 statusNote.textContent = '';
               } else {
                 // Fallback: fetch RSS for sidebar if recentVideos not in cache
@@ -2082,9 +2110,9 @@
           
           console.log('📺 RSS feed: loading', first.title);
 
-          // recente items (limit)
+          // recente items (limit) - skip first video (already in player)
           recentList.innerHTML = '';
-          items.slice(0, RECENT_COUNT).forEach(it => {
+          items.slice(1, RECENT_COUNT + 1).forEach(it => {
             const vid = extractVideoIdFromLink(it.link) || (it.guid && it.guid.split(':').pop());
             addRecentItem(vid, it.title, it.pubDate);
           });

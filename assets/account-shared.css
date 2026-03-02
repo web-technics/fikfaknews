@@ -1,0 +1,97 @@
+/* FikFak News Shared Styles - for account pages */
+:root{
+  --bg:#0f1724;
+  --card:#0b1220;
+  --accent:#1c63cf;
+  --muted:#9aa4b2;
+  --max-width:980px;
+}
+*{box-sizing:border-box}
+body{
+  margin:0;
+  font-family:Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+  background:linear-gradient(180deg,#071028 0%, #071b2b 100%);
+  color:#e6eef6;
+  -webkit-font-smoothing:antialiased;
+  -moz-osx-font-smoothing:grayscale;
+  min-height:100vh;
+  padding:32px 16px;
+}
+.logo-top {
+  width:100%;
+  margin:32px auto 24px auto;
+  display:block;
+  text-align:center;
+}
+.account-box {
+  max-width: 420px;
+  margin: 60px auto;
+  background: var(--card);
+  padding: 32px;
+  border-radius: 14px;
+  box-shadow: 0 4px 24px #1c63cf22;
+  color: #e6eef6;
+}
+.account-box h2 {
+  margin-bottom: 20px;
+  color: var(--accent);
+  font-size: 2em;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+.account-box input {
+  width: 100%;
+  padding: 12px;
+  margin: 12px 0;
+  border-radius: 7px;
+  border: 1px solid #23304a;
+  background: #101a2b;
+  color: #e6eef6;
+  font-size: 1.1em;
+}
+.account-btn {
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  padding: 13px 0;
+  border-radius: 7px;
+  font-size: 1.1em;
+  font-weight: 600;
+  width: 100%;
+  margin-top: 10px;
+  cursor: pointer;
+  box-shadow: 0 2px 8px #1c63cf22;
+  transition: background 0.2s;
+}
+.account-btn:hover { background: #174fa3; }
+.error { color: #ffb2b2; background: rgba(255,80,80,0.06); border: 1px solid rgba(255,80,80,0.08); border-radius: 8px; padding: 10px; margin-bottom: 10px; }
+.success { color: #80ffb2; background: rgba(80,255,80,0.06); border: 1px solid rgba(80,255,80,0.08); border-radius: 8px; padding: 10px; margin-bottom: 10px; }
+.account-link { color: var(--accent); text-decoration: none; font-weight: 600; transition: color 0.2s; display: block; margin-top: 18px; text-align: center; }
+.account-link:hover { color: #174fa3; text-decoration: underline; }
+.meta { color: var(--muted); font-size: 0.95em; margin-bottom: 10px; }
+@media (max-width: 600px) {
+  .account-box {
+    max-width: 98vw;
+    margin: 24px auto;
+    padding: 16px;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px #1c63cf22;
+  }
+  .account-box h2 {
+    font-size: 1.6em;
+    margin-bottom: 16px;
+  }
+  .account-box input {
+    font-size: 1.15em;
+    padding: 14px;
+    margin: 10px 0;
+  }
+  .account-btn {
+    font-size: 1.15em;
+    padding: 14px 0;
+    margin-top: 12px;
+  }
+  .logo-top {
+    margin: 16px auto 12px auto;
+  }
+}

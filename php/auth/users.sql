@@ -1,0 +1,8 @@
+-- SQL voor gebruikers tabel
+CREATE TABLE users (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    gebruikersnaam VARCHAR(50) NOT NULL UNIQUE,
+    email VARCHAR(100) NOT NULL UNIQUE,
+    wachtwoord VARCHAR(255) NOT NULL,
+    aangemaakt_op TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
