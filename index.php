@@ -6,6 +6,7 @@ $videoData = [
     'title' => 'FikFak News Uitzending',
     'published' => '2026-01-05T00:00:00+00:00'
 ];
+$recentVideos = [];
 
 if (file_exists($latestVideoFile)) {
     $json = @file_get_contents($latestVideoFile);
@@ -17,9 +18,67 @@ if (file_exists($latestVideoFile)) {
                 'title' => isset($decoded['title']) ? $decoded['title'] : 'FikFak News Uitzending',
                 'published' => isset($decoded['published']) ? $decoded['published'] : date('c')
             ];
+
+      if (!empty($decoded['recentVideos']) && is_array($decoded['recentVideos'])) {
+        $recentVideos = $decoded['recentVideos'];
+      }
         }
     }
 }
+
+$baseUrl = 'https://go.fikfak.news/';
+$requestedVideoId = isset($_GET['v']) ? trim((string) $_GET['v']) : '';
+$selectedVideo = $videoData;
+
+if ($requestedVideoId !== '' && preg_match('/^[A-Za-z0-9_-]{11}$/', $requestedVideoId)) {
+  if ($requestedVideoId === (string) $videoData['videoId']) {
+    $selectedVideo = $videoData;
+  } else {
+    foreach ($recentVideos as $recentVideo) {
+      if (!is_array($recentVideo) || !isset($recentVideo['videoId'])) {
+        continue;
+      }
+
+      if ((string) $recentVideo['videoId'] === $requestedVideoId) {
+        $selectedVideo = [
+          'videoId' => $requestedVideoId,
+          'title' => isset($recentVideo['title']) ? (string) $recentVideo['title'] : 'FikFak News Uitzending',
+          'published' => isset($recentVideo['published']) ? (string) $recentVideo['published'] : date('c')
+        ];
+        break;
+      }
+    }
+
+    if ((string) $selectedVideo['videoId'] !== $requestedVideoId) {
+      $selectedVideo = [
+        'videoId' => $requestedVideoId,
+        'title' => 'FikFak News Uitzending',
+        'published' => date('c')
+      ];
+    }
+  }
+}
+
+header('Cache-Control: no-cache, no-store, must-revalidate, max-age=0');
+header('Pragma: no-cache');
+header('Expires: 0');
+
+$publishedTimestamp = strtotime($selectedVideo['published']);
+if ($publishedTimestamp === false) {
+  $publishedTimestamp = time();
+}
+$publishedIso = date('c', $publishedTimestamp);
+$selectedVideoId = (string) $selectedVideo['videoId'];
+$selectedTitle = trim((string) $selectedVideo['title']) !== '' ? (string) $selectedVideo['title'] : 'FikFak News Uitzending';
+$pageTitle = '📰 ' . $selectedTitle . ' | FikFak News';
+$pageDescription = '🎯 ' . $selectedTitle . ' - Bekijk de nieuwste FikFak News uitzending met onafhankelijke analyse en een kritische blik op media en politiek.';
+$shareUrl = $baseUrl . '?v=' . rawurlencode($selectedVideoId);
+$canonicalUrl = $requestedVideoId === '' && $selectedVideoId === (string) $videoData['videoId']
+  ? $baseUrl
+  : $shareUrl;
+$thumbnailUrl = 'https://img.youtube.com/vi/' . rawurlencode($selectedVideoId) . '/hqdefault.jpg?v=' . rawurlencode($publishedIso);
+$embedUrl = 'https://www.youtube.com/embed/' . rawurlencode($selectedVideoId);
+$watchUrl = 'https://www.youtube.com/watch?v=' . rawurlencode($selectedVideoId);
 
 error_reporting(E_ALL);
 ini_set('display_errors', 0);
@@ -47,9 +106,9 @@ ini_set('display_errors', 0);
   <meta http-equiv="X-Content-Type-Options" content="nosniff">
   
   <!-- Primary Meta Tags -->
-  <title>📰 FikFak News — Alternatief Nieuws van @fikfakmaster | Dirk Theuns</title>
-  <meta name="title" content="📰 FikFak News — Alternatief Nieuws van @fikfakmaster" />
-  <meta name="description" content="🎯 Bekijk de nieuwste FikFak News uitzending! Onafhankelijk nieuws, actuele analyse en kritische blik op media en politiek door journalist Dirk Theuns. Winnaar Beste Journalist 2025. 🔥" />
+  <title><?php echo htmlspecialchars($pageTitle, ENT_QUOTES, 'UTF-8'); ?></title>
+  <meta name="title" content="<?php echo htmlspecialchars($pageTitle, ENT_QUOTES, 'UTF-8'); ?>" />
+  <meta name="description" content="<?php echo htmlspecialchars($pageDescription, ENT_QUOTES, 'UTF-8'); ?>" />
   <meta name="keywords" content="FikFak News, fikfakmaster, Dirk Theuns, alternatief nieuws, onafhankelijk nieuws, nieuws analyse, Nederlandse media, actueel, politiek, nieuwsuitzending, fikfak.news, beste journalist 2025, kritisch nieuws, media-analyse, onafhankelijke journalistiek" />
   <meta name="author" content="Dirk Theuns (@fikfakmaster)" />
   <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
@@ -58,19 +117,19 @@ ini_set('display_errors', 0);
   
   <!-- Open Graph / Facebook / WhatsApp -->
   <meta property="og:type" content="website" />
-  <meta property="og:url" content="https://go.fikfak.news/" />
+  <meta property="og:url" content="<?php echo htmlspecialchars($shareUrl, ENT_QUOTES, 'UTF-8'); ?>" />
   <meta property="og:site_name" content="FikFak News" />
-  <meta property="og:title" content="📰 <?php echo htmlspecialchars($videoData['title'], ENT_QUOTES, 'UTF-8'); ?> | FikFak News" />
-  <meta property="og:description" content="🎯 Bekijk de nieuwste FikFak News uitzending! Onafhankelijk nieuws, actuele analyse en kritische blik op media en politiek door journalist Dirk Theuns. Winnaar Beste Journalist 2025. 🔥" />
-  <meta property="og:image" content="https://img.youtube.com/vi/<?php echo htmlspecialchars($videoData['videoId'], ENT_QUOTES, 'UTF-8'); ?>/hqdefault.jpg" />
-  <meta property="og:image:secure_url" content="https://img.youtube.com/vi/<?php echo htmlspecialchars($videoData['videoId'], ENT_QUOTES, 'UTF-8'); ?>/hqdefault.jpg" />
+  <meta property="og:title" content="<?php echo htmlspecialchars($pageTitle, ENT_QUOTES, 'UTF-8'); ?>" />
+  <meta property="og:description" content="<?php echo htmlspecialchars($pageDescription, ENT_QUOTES, 'UTF-8'); ?>" />
+  <meta property="og:image" content="<?php echo htmlspecialchars($thumbnailUrl, ENT_QUOTES, 'UTF-8'); ?>" />
+  <meta property="og:image:secure_url" content="<?php echo htmlspecialchars($thumbnailUrl, ENT_QUOTES, 'UTF-8'); ?>" />
   <meta property="og:image:type" content="image/jpeg" />
   <meta property="og:image:width" content="480" />
   <meta property="og:image:height" content="360" />
-  <meta property="og:image:alt" content="FikFak News - Nieuwste uitzending" />
+  <meta property="og:image:alt" content="<?php echo htmlspecialchars($selectedTitle . ' - FikFak News', ENT_QUOTES, 'UTF-8'); ?>" />
   <meta property="og:locale" content="nl_NL" />
   <meta property="og:locale:alternate" content="nl_BE" />
-  <meta property="og:video" content="https://www.youtube.com/embed/<?php echo htmlspecialchars($videoData['videoId'], ENT_QUOTES, 'UTF-8'); ?>" />
+  <meta property="og:video" content="<?php echo htmlspecialchars($embedUrl, ENT_QUOTES, 'UTF-8'); ?>" />
   <meta property="og:video:type" content="text/html" />
   <meta property="og:video:width" content="1280" />
   <meta property="og:video:height" content="720" />
@@ -80,23 +139,22 @@ ini_set('display_errors', 0);
   <meta property="article:tag" content="Nieuws" />
   <meta property="article:tag" content="Politiek" />
   <meta property="article:tag" content="Media" />
-  <meta property="article:modified_time" content="2026-01-05T00:00:00+00:00" />
+  <meta property="article:published_time" content="<?php echo htmlspecialchars($publishedIso, ENT_QUOTES, 'UTF-8'); ?>" />
+  <meta property="article:modified_time" content="<?php echo htmlspecialchars($publishedIso, ENT_QUOTES, 'UTF-8'); ?>" />
   
   <!-- Twitter -->
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:site" content="@dirktheuns" />
   <meta name="twitter:creator" content="@dirktheuns" />
-  <meta name="twitter:url" content="https://go.fikfak.news/" />
-  <meta name="twitter:title" content="📰 <?php echo htmlspecialchars($videoData['title'], ENT_QUOTES, 'UTF-8'); ?> | FikFak News" />
-  <meta name="twitter:description" content="🎯 Bekijk de nieuwste FikFak News uitzending! Onafhankelijk nieuws, actuele analyse en kritische blik op media en politiek door journalist Dirk Theuns. Winnaar Beste Journalist 2025. 🔥" />
-  <meta name="twitter:image" content="https://img.youtube.com/vi/<?php echo htmlspecialchars($videoData['videoId'], ENT_QUOTES, 'UTF-8'); ?>/hqdefault.jpg" />
-  <meta name="twitter:image:alt" content="FikFak News - Onafhankelijk nieuws" />
-  <meta name="twitter:player" content="https://www.youtube.com/embed/<?php echo htmlspecialchars($videoData['videoId'], ENT_QUOTES, 'UTF-8'); ?>" />
-  <meta name="twitter:player:width" content="1280" />
-  <meta name="twitter:player:height" content="720" />
+  <meta name="twitter:url" content="<?php echo htmlspecialchars($shareUrl, ENT_QUOTES, 'UTF-8'); ?>" />
+  <meta name="twitter:title" content="<?php echo htmlspecialchars($pageTitle, ENT_QUOTES, 'UTF-8'); ?>" />
+  <meta name="twitter:description" content="<?php echo htmlspecialchars($pageDescription, ENT_QUOTES, 'UTF-8'); ?>" />
+  <meta name="twitter:image" content="<?php echo htmlspecialchars($thumbnailUrl, ENT_QUOTES, 'UTF-8'); ?>" />
+  <meta name="twitter:image:src" content="<?php echo htmlspecialchars($thumbnailUrl, ENT_QUOTES, 'UTF-8'); ?>" />
+  <meta name="twitter:image:alt" content="<?php echo htmlspecialchars($selectedTitle . ' - FikFak News', ENT_QUOTES, 'UTF-8'); ?>" />
   
   <!-- WhatsApp Specific Optimization -->
-  <meta property="og:updated_time" content="<?php echo htmlspecialchars($videoData['published'], ENT_QUOTES, 'UTF-8'); ?>" />
+  <meta property="og:updated_time" content="<?php echo htmlspecialchars($publishedIso, ENT_QUOTES, 'UTF-8'); ?>" />
   <meta property="og:see_also" content="https://fikfak.news/" />
   <meta property="og:see_also" content="https://www.youtube.com/@fikfakmaster" />
   
@@ -104,7 +162,7 @@ ini_set('display_errors', 0);
   <meta name="telegram:channel" content="@fikfakmaster" />
   
   <!-- Canonical URL -->
-  <link rel="canonical" href="https://go.fikfak.news/" />
+  <link rel="canonical" href="<?php echo htmlspecialchars($canonicalUrl, ENT_QUOTES, 'UTF-8'); ?>" />
   
   <!-- Favicon & App Icons -->
   <link rel="icon" type="image/png" href="assets/favicons/favicon.png" />
@@ -156,8 +214,6 @@ ini_set('display_errors', 0);
   <meta name="news_keywords" content="FikFak News, Dirk Theuns, alternatief nieuws, onafhankelijke journalistiek, beste journalist 2025" />
   <meta name="category" content="News and Media" />
   <meta name="publisher" content="FikFak News" />
-  <meta property="article:published_time" content="2026-02-01T00:00:00+00:00" />
-  <meta property="article:modified_time" content="2026-02-01T14:00:00+00:00" />
   
   <!-- Schema.org JSON-LD Structured Data -->
   <script type="application/ld+json">
@@ -230,9 +286,9 @@ ini_set('display_errors', 0);
       {
         "@type": "WebPage",
         "@id": "https://go.fikfak.news/#webpage",
-        "url": "https://go.fikfak.news/",
-        "name": "FikFak News — Nieuwste Video van Dirk Theuns",
-        "description": "Bekijk de nieuwste FikFak News uitzending. Onafhankelijk nieuws, actuele analyse en een frisse kijk op media en politiek.",
+        "url": "<?php echo htmlspecialchars($canonicalUrl, ENT_QUOTES, 'UTF-8'); ?>",
+        "name": "<?php echo htmlspecialchars($pageTitle, ENT_QUOTES, 'UTF-8'); ?>",
+        "description": "<?php echo htmlspecialchars($pageDescription, ENT_QUOTES, 'UTF-8'); ?>",
         "isPartOf": {
           "@id": "https://go.fikfak.news/#website"
         },
@@ -243,30 +299,30 @@ ini_set('display_errors', 0);
         "primaryImageOfPage": {
           "@type": "ImageObject",
           "@id": "https://go.fikfak.news/#primaryimage",
-          "url": "https://go.fikfak.news/og-preview.jpg",
-          "width": 1200,
-          "height": 630,
-          "caption": "FikFak News Preview"
+          "url": "<?php echo htmlspecialchars($thumbnailUrl, ENT_QUOTES, 'UTF-8'); ?>",
+          "width": 480,
+          "height": 360,
+          "caption": "<?php echo htmlspecialchars($selectedTitle, ENT_QUOTES, 'UTF-8'); ?>"
         },
-        "datePublished": "2026-01-05T00:00:00+00:00",
-        "dateModified": "2026-01-05T00:00:00+00:00",
+        "datePublished": "<?php echo htmlspecialchars($publishedIso, ENT_QUOTES, 'UTF-8'); ?>",
+        "dateModified": "<?php echo htmlspecialchars($publishedIso, ENT_QUOTES, 'UTF-8'); ?>",
         "inLanguage": "nl-NL",
         "potentialAction": [
           {
             "@type": "WatchAction",
-            "target": ["https://go.fikfak.news/"]
+            "target": ["<?php echo htmlspecialchars($shareUrl, ENT_QUOTES, 'UTF-8'); ?>"]
           }
         ]
       },
       {
         "@type": "VideoObject",
         "@id": "https://go.fikfak.news/#video",
-        "name": "FikFak News Uitzending",
-        "description": "Bekijk de nieuwste FikFak News video met onafhankelijk nieuws en actuele analyse",
-        "thumbnailUrl": "https://i.ytimg.com/vi/VIDEO_ID/maxresdefault.jpg",
-        "uploadDate": "2026-01-05T00:00:00+00:00",
-        "contentUrl": "https://www.youtube.com/watch?v=VIDEO_ID",
-        "embedUrl": "https://www.youtube.com/embed/VIDEO_ID",
+        "name": "<?php echo htmlspecialchars($selectedTitle, ENT_QUOTES, 'UTF-8'); ?>",
+        "description": "<?php echo htmlspecialchars($pageDescription, ENT_QUOTES, 'UTF-8'); ?>",
+        "thumbnailUrl": "<?php echo htmlspecialchars($thumbnailUrl, ENT_QUOTES, 'UTF-8'); ?>",
+        "uploadDate": "<?php echo htmlspecialchars($publishedIso, ENT_QUOTES, 'UTF-8'); ?>",
+        "contentUrl": "<?php echo htmlspecialchars($watchUrl, ENT_QUOTES, 'UTF-8'); ?>",
+        "embedUrl": "<?php echo htmlspecialchars($embedUrl, ENT_QUOTES, 'UTF-8'); ?>",
         "publisher": {
           "@id": "https://go.fikfak.news/#organization"
         },
@@ -1798,6 +1854,20 @@ ini_set('display_errors', 0);
       const watchOnYouTube = document.getElementById('watch-on-youtube');
       const subscribeBtn = document.getElementById('subscribe-btn');
       const playerWrap = document.getElementById('player-wrap');
+      const basePageUrl = 'https://go.fikfak.news/';
+      const initialVideoData = {
+        videoId: <?php echo json_encode($selectedVideoId, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE); ?>,
+        title: <?php echo json_encode($selectedTitle, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE); ?>,
+        published: <?php echo json_encode($publishedIso, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE); ?>
+      };
+      const requestedVideoId = (() => {
+        try {
+          const value = new URL(window.location.href).searchParams.get('v') || '';
+          return /^[A-Za-z0-9_-]{11}$/.test(value) ? value : '';
+        } catch (error) {
+          return '';
+        }
+      })();
 
       // subscribe-link
       if (isChannelId) {
@@ -1822,6 +1892,47 @@ ini_set('display_errors', 0);
           const m = link.match(/v=([^&]+)/);
           return m ? m[1] : null;
         }
+      }
+
+      function buildSharePageUrl(videoId) {
+        return videoId ? basePageUrl + '?v=' + encodeURIComponent(videoId) : basePageUrl;
+      }
+
+      function syncBrowserUrl(videoId) {
+        const nextUrl = new URL(window.location.href);
+        if (videoId) {
+          nextUrl.searchParams.set('v', videoId);
+        } else {
+          nextUrl.searchParams.delete('v');
+        }
+        window.history.replaceState({ videoId }, '', nextUrl.toString());
+      }
+
+      function resolveRequestedVideo(latestData) {
+        if (!requestedVideoId) {
+          return null;
+        }
+
+        if (latestData && latestData.videoId === requestedVideoId) {
+          return latestData;
+        }
+
+        if (latestData && Array.isArray(latestData.recentVideos)) {
+          const matched = latestData.recentVideos.find((video) => video && video.videoId === requestedVideoId);
+          if (matched) {
+            return matched;
+          }
+        }
+
+        if (initialVideoData.videoId === requestedVideoId) {
+          return initialVideoData;
+        }
+
+        return {
+          videoId: requestedVideoId,
+          title: initialVideoData.title || 'FikFak News Uitzending',
+          published: initialVideoData.published || new Date().toISOString()
+        };
       }
 
       function addRecentItem(videoId, title, published) {
@@ -1961,19 +2072,34 @@ ini_set('display_errors', 0);
 
       // Update social media meta tags for sharing
       function updateSocialMetaTags(videoId, title, published) {
-        const videoUrl = 'https://www.youtube.com/watch?v=' + videoId;
         const embedUrl = 'https://www.youtube.com/embed/' + videoId;
         // Use hqdefault for best compatibility (always available, 480x360)
         const thumbUrl = 'https://img.youtube.com/vi/' + videoId + '/hqdefault.jpg';
-        const pageUrl = 'https://go.fikfak.news/';
+        const pageUrl = buildSharePageUrl(videoId);
+        const shareTitle = '📰 ' + title + ' | FikFak News';
+        const shareDescription = '🎯 ' + title + ' - Bekijk de nieuwste FikFak News uitzending!';
         
+        syncBrowserUrl(videoId);
+
+        let metaTitle = document.querySelector('meta[name="title"]');
+        if (metaTitle) metaTitle.setAttribute('content', shareTitle);
+
+        let metaDescription = document.querySelector('meta[name="description"]');
+        if (metaDescription) metaDescription.setAttribute('content', shareDescription);
+
+        let canonical = document.querySelector('link[rel="canonical"]');
+        if (canonical) canonical.setAttribute('href', pageUrl);
+
+        let ogUrl = document.querySelector('meta[property="og:url"]');
+        if (ogUrl) ogUrl.setAttribute('content', pageUrl);
+
         // Update og:title
         let ogTitle = document.querySelector('meta[property="og:title"]');
-        if (ogTitle) ogTitle.setAttribute('content', '📰 ' + title + ' | FikFak News');
+        if (ogTitle) ogTitle.setAttribute('content', shareTitle);
         
         // Update og:description
         let ogDesc = document.querySelector('meta[property="og:description"]');
-        if (ogDesc) ogDesc.setAttribute('content', '🎯 ' + title + ' - Bekijk de nieuwste FikFak News uitzending!');
+        if (ogDesc) ogDesc.setAttribute('content', shareDescription);
         
         // Update og:image
         let ogImage = document.querySelector('meta[property="og:image"]');
@@ -1990,23 +2116,36 @@ ini_set('display_errors', 0);
         if (ogImageHeight) ogImageHeight.setAttribute('content', '360');
         let ogImageAlt = document.querySelector('meta[property="og:image:alt"]');
         if (ogImageAlt) ogImageAlt.setAttribute('content', title + ' - FikFak News');
+
+        let articlePublished = document.querySelector('meta[property="article:published_time"]');
+        if (articlePublished && published) articlePublished.setAttribute('content', published);
+        let articleModified = document.querySelector('meta[property="article:modified_time"]');
+        if (articleModified && published) articleModified.setAttribute('content', published);
+        let ogUpdated = document.querySelector('meta[property="og:updated_time"]');
+        if (ogUpdated && published) ogUpdated.setAttribute('content', published);
         
         // Update og:video
         let ogVideo = document.querySelector('meta[property="og:video"]');
         if (ogVideo) ogVideo.setAttribute('content', embedUrl);
         
         // Update Twitter card
+        let twitterUrl = document.querySelector('meta[name="twitter:url"]');
+        if (twitterUrl) twitterUrl.setAttribute('content', pageUrl);
         let twitterTitle = document.querySelector('meta[name="twitter:title"]');
-        if (twitterTitle) twitterTitle.setAttribute('content', '📰 ' + title + ' | FikFak News');
+        if (twitterTitle) twitterTitle.setAttribute('content', shareTitle);
         let twitterDesc = document.querySelector('meta[name="twitter:description"]');
-        if (twitterDesc) twitterDesc.setAttribute('content', '🎯 ' + title);
+        if (twitterDesc) twitterDesc.setAttribute('content', shareDescription);
         let twitterImage = document.querySelector('meta[name="twitter:image"]');
         if (twitterImage) twitterImage.setAttribute('content', thumbUrl);
+        let twitterImageSrc = document.querySelector('meta[name="twitter:image:src"]');
+        if (twitterImageSrc) twitterImageSrc.setAttribute('content', thumbUrl);
+        let twitterImageAlt = document.querySelector('meta[name="twitter:image:alt"]');
+        if (twitterImageAlt) twitterImageAlt.setAttribute('content', title + ' - FikFak News');
         let twitterPlayer = document.querySelector('meta[name="twitter:player"]');
         if (twitterPlayer) twitterPlayer.setAttribute('content', embedUrl);
         
         // Update page title
-        document.title = '📰 ' + title + ' | FikFak News';
+        document.title = shareTitle;
         
         console.log('✅ Social meta tags updated for:', title);
         console.log('   Thumbnail:', thumbUrl);
@@ -2031,9 +2170,10 @@ ini_set('display_errors', 0);
           .then(latestData => {
             if (latestData && latestData.videoId) {
               console.log('✅ Loaded from latest-video.json:', latestData.videoId);
+              const selectedVideo = resolveRequestedVideo(latestData) || latestData;
               
               // Load main video
-              loadMainVideo(latestData.videoId, latestData.title, latestData.published);
+              loadMainVideo(selectedVideo.videoId, selectedVideo.title, selectedVideo.published);
               
               // Populate sidebar from cached recentVideos if available
               if (latestData.recentVideos && Array.isArray(latestData.recentVideos) && latestData.recentVideos.length > 0) {
@@ -2041,7 +2181,7 @@ ini_set('display_errors', 0);
                 recentList.innerHTML = '';
                 let count = 0;
                 for (const video of latestData.recentVideos) {
-                  if (video.videoId && video.videoId !== latestData.videoId) {
+                  if (video.videoId && video.videoId !== selectedVideo.videoId) {
                     addRecentItem(video.videoId, video.title, video.published);
                     count++;
                     if (count >= RECENT_COUNT) break;
@@ -2237,6 +2377,7 @@ ini_set('display_errors', 0);
             if (watchOnYouTube) watchOnYouTube.href = 'https://www.youtube.com/watch?v=' + videoId;
             statusNote.textContent = 'Geselecteerde video afspelen';
             currentVideoId = videoId;
+            updateSocialMetaTags(videoId, title || 'FikFak News Uitzending', published);
           } catch(e) {
             loadYouTubeIframeAPI(() => createYTPlayer(videoId, title, published));
           }
