@@ -17,7 +17,9 @@ Modern, fast, and secure landing page for FikFak News (@fikfakmaster) - Alternat
 
 ```
 go.fikfak.news/
-├── index.html              # Main landing page
+├── index.php               # Main landing page (dynamic latest video + social metadata)
+├── latest-video.json       # Cached latest/recent YouTube videos
+├── update-latest-video.php # Cron updater for latest-video.json
 ├── privacy-policy.html     # Privacy policy page
 ├── .htaccess              # Apache configuration (caching, security)
 ├── assets/

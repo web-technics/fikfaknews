@@ -59,10 +59,6 @@ if ($requestedVideoId !== '' && preg_match('/^[A-Za-z0-9_-]{11}$/', $requestedVi
   }
 }
 
-header('Cache-Control: no-cache, no-store, must-revalidate, max-age=0');
-header('Pragma: no-cache');
-header('Expires: 0');
-
 $publishedTimestamp = strtotime($selectedVideo['published']);
 if ($publishedTimestamp === false) {
   $publishedTimestamp = time();
@@ -75,10 +71,42 @@ $pageDescription = '🎯 ' . $selectedTitle . ' - Bekijk de nieuwste FikFak News
 $shareUrl = $baseUrl . '?v=' . rawurlencode($selectedVideoId);
 $canonicalUrl = $requestedVideoId === '' && $selectedVideoId === (string) $videoData['videoId']
   ? $baseUrl
-  : $shareUrl;
-$thumbnailUrl = 'https://img.youtube.com/vi/' . rawurlencode($selectedVideoId) . '/hqdefault.jpg?v=' . rawurlencode($publishedIso);
+  : $baseUrl . '?v=' . rawurlencode($selectedVideoId);
+$thumbnailUrl = 'https://i.ytimg.com/vi/' . rawurlencode($selectedVideoId) . '/hqdefault.jpg';
 $embedUrl = 'https://www.youtube.com/embed/' . rawurlencode($selectedVideoId);
 $watchUrl = 'https://www.youtube.com/watch?v=' . rawurlencode($selectedVideoId);
+
+$userAgent = isset($_SERVER['HTTP_USER_AGENT']) ? strtolower((string) $_SERVER['HTTP_USER_AGENT']) : '';
+$isSocialCrawler = false;
+if ($userAgent !== '') {
+  $socialCrawlerSignatures = [
+    'twitterbot',
+    'facebookexternalhit',
+    'whatsapp',
+    'telegrambot',
+    'linkedinbot',
+    'slackbot',
+    'discordbot',
+    'skypeuripreview',
+    'googlebot'
+  ];
+
+  foreach ($socialCrawlerSignatures as $signature) {
+    if (strpos($userAgent, $signature) !== false) {
+      $isSocialCrawler = true;
+      break;
+    }
+  }
+}
+
+header('Cache-Control: no-cache, no-store, must-revalidate, max-age=0');
+header('Pragma: no-cache');
+header('Expires: 0');
+
+if ($requestedVideoId === '' && $isSocialCrawler) {
+  header('Location: ' . $shareUrl, true, 302);
+  exit;
+}
 
 error_reporting(E_ALL);
 ini_set('display_errors', 0);
@@ -116,7 +144,7 @@ ini_set('display_errors', 0);
   <meta name="revisit-after" content="2 days" />
   
   <!-- Open Graph / Facebook / WhatsApp -->
-  <meta property="og:type" content="website" />
+  <meta property="og:type" content="video.other" />
   <meta property="og:url" content="<?php echo htmlspecialchars($shareUrl, ENT_QUOTES, 'UTF-8'); ?>" />
   <meta property="og:site_name" content="FikFak News" />
   <meta property="og:title" content="<?php echo htmlspecialchars($pageTitle, ENT_QUOTES, 'UTF-8'); ?>" />
@@ -146,6 +174,7 @@ ini_set('display_errors', 0);
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:site" content="@dirktheuns" />
   <meta name="twitter:creator" content="@dirktheuns" />
+  <meta name="twitter:domain" content="go.fikfak.news" />
   <meta name="twitter:url" content="<?php echo htmlspecialchars($shareUrl, ENT_QUOTES, 'UTF-8'); ?>" />
   <meta name="twitter:title" content="<?php echo htmlspecialchars($pageTitle, ENT_QUOTES, 'UTF-8'); ?>" />
   <meta name="twitter:description" content="<?php echo htmlspecialchars($pageDescription, ENT_QUOTES, 'UTF-8'); ?>" />
