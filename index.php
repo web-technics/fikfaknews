@@ -158,9 +158,14 @@ ini_set('display_errors', 0);
   <meta property="og:locale" content="nl_NL" />
   <meta property="og:locale:alternate" content="nl_BE" />
   <meta property="og:video" content="<?php echo htmlspecialchars($embedUrl, ENT_QUOTES, 'UTF-8'); ?>" />
+  <meta property="og:video:url" content="<?php echo htmlspecialchars($embedUrl, ENT_QUOTES, 'UTF-8'); ?>" />
+  <meta property="og:video:secure_url" content="<?php echo htmlspecialchars($embedUrl, ENT_QUOTES, 'UTF-8'); ?>" />
   <meta property="og:video:type" content="text/html" />
   <meta property="og:video:width" content="1280" />
   <meta property="og:video:height" content="720" />
+  <meta property="og:video:tag" content="FikFak News" />
+  <meta property="og:video:tag" content="Nieuws" />
+  <meta property="og:video:tag" content="Journalistiek" />
   <meta property="article:publisher" content="https://go.fikfak.news/" />
   <meta property="article:author" content="https://www.dirktheuns.be/" />
   <meta property="article:section" content="Nieuws" />
@@ -169,6 +174,7 @@ ini_set('display_errors', 0);
   <meta property="article:tag" content="Media" />
   <meta property="article:published_time" content="<?php echo htmlspecialchars($publishedIso, ENT_QUOTES, 'UTF-8'); ?>" />
   <meta property="article:modified_time" content="<?php echo htmlspecialchars($publishedIso, ENT_QUOTES, 'UTF-8'); ?>" />
+  <meta property="og:video:release_date" content="<?php echo htmlspecialchars($publishedIso, ENT_QUOTES, 'UTF-8'); ?>" />
   
   <!-- Twitter -->
   <meta name="twitter:card" content="summary_large_image" />
@@ -217,8 +223,6 @@ ini_set('display_errors', 0);
   <link rel="dns-prefetch" href="https://i.ytimg.com" />
   <link rel="dns-prefetch" href="https://img.youtube.com" />
   <link rel="dns-prefetch" href="https://fonts.googleapis.com" />
-  <!-- Preload YouTube IFrame API for faster video loading -->
-  <link rel="preload" as="script" href="https://www.youtube.com/iframe_api" />
   <!-- Preload YouTube IFrame API for faster video loading -->
   <link rel="preload" as="script" href="https://www.youtube.com/iframe_api" />
   <link rel="dns-prefetch" href="https://fikfak.news" />
@@ -2152,10 +2156,16 @@ ini_set('display_errors', 0);
         if (articleModified && published) articleModified.setAttribute('content', published);
         let ogUpdated = document.querySelector('meta[property="og:updated_time"]');
         if (ogUpdated && published) ogUpdated.setAttribute('content', published);
+        let ogVideoRelease = document.querySelector('meta[property="og:video:release_date"]');
+        if (ogVideoRelease && published) ogVideoRelease.setAttribute('content', published);
         
         // Update og:video
         let ogVideo = document.querySelector('meta[property="og:video"]');
         if (ogVideo) ogVideo.setAttribute('content', embedUrl);
+        let ogVideoUrl = document.querySelector('meta[property="og:video:url"]');
+        if (ogVideoUrl) ogVideoUrl.setAttribute('content', embedUrl);
+        let ogVideoSecure = document.querySelector('meta[property="og:video:secure_url"]');
+        if (ogVideoSecure) ogVideoSecure.setAttribute('content', embedUrl);
         
         // Update Twitter card
         let twitterUrl = document.querySelector('meta[name="twitter:url"]');
