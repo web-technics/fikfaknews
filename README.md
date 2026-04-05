@@ -9,7 +9,8 @@ Modern, fast, and secure landing page for FikFak News (@fikfakmaster) - Alternat
 - **Performance**: Lazy loading, GZIP compression, browser caching
 - **Security**: HTTPS enforced, CSP headers, HSTS, rate limiting
 - **Accessibility**: WCAG 2.1 AA compliant with ARIA labels
-- **SEO Optimized**: Meta tags, Open Graph, structured data
+- **SEO Optimized**: Comprehensive meta tags, Open Graph, structured data, Twitter Cards
+- **Social Sharing**: Dynamic meta tags ensure latest video always displays on Facebook, WhatsApp, Twitter, Telegram
 - **GDPR Compliant**: Cookie consent banner with granular controls
 - **Analytics**: Google Analytics 4 with event tracking
 
@@ -41,10 +42,11 @@ go.fikfak.news/
 
 ## ⚙️ Setup
 
+### Basic Installation
 1. **Clone the repository:**
    ```bash
-   git clone https://github.com/YOUR_USERNAME/go-fikfak-news.git
-   cd go-fikfak-news
+   git clone https://github.com/web-technics/fikfak-news.git
+   cd fikfak-news
    ```
 
 2. **Configure PHP forms:**
@@ -55,6 +57,23 @@ go.fikfak.news/
    - Upload to your web server's document root
    - Ensure Apache mod_rewrite, mod_headers, mod_deflate are enabled
    - HTTPS/SSL certificate required
+
+### Automatic Video Updates (Cron)
+To keep the latest video metadata current for social sharing:
+
+1. **Set up a cron job** to run `update-latest-video.php` periodically:
+   ```bash
+   */10 * * * 0 8-9 /usr/bin/php /path/to/update-latest-video.php
+   ```
+   This updates every 10 minutes on Sunday mornings (8-9am CET) before the 8am broadcast.
+
+2. **YouTube API Key (Optional):**
+   - Add your YouTube Data API key to `update-latest-video.php` for faster updates
+   - Falls back to YouTube RSS feed if API key is missing or fails
+
+3. **Verify operation:**
+   - Check `latest-video.json` file was updated with your latest video
+   - File should contain: videoId, title, published date, and recentVideos array
 
 ## 🔒 Security Features
 
@@ -72,6 +91,37 @@ Google Analytics 4 tracking includes:
 - Form submissions
 - Newsletter signups
 - Contact/donation modal interactions
+
+## 📱 Social Sharing Optimization
+
+Every broadcast automatically optimizes for social media sharing:
+
+**Dynamic Meta Tags:**
+- Automatically detects latest video from `latest-video.json`
+- Serves correct Open Graph tags (og:title, og:description, og:image, og:video)
+- Includes video-specific metadata: duration, release date, tags
+- Supports all major video metadata standards
+
+**Platform-Specific Support:**
+- **Facebook & WhatsApp**: Rich preview with video thumbnail and description
+- **Twitter**: Summary card with large image
+- **Telegram**: Video link preview with metadata
+- **Discord**: Embedded video preview with proper dimensions
+- **LinkedIn**: Article-style preview with video link
+
+**Auto-Redirect for Social Crawlers:**
+- Root URL (`/`) redirects social crawlers to latest video URL with `?v=[videoId]`
+- Ensures consistent metadata in social shares
+- Happens server-side before JavaScript execution (crawler-friendly)
+
+**Implementation Details:**
+- Latest video stored in `latest-video.json` (updated by `update-latest-video.php` cron)
+- Client-side meta tag updates when users manually switch videos
+- All timestamps in ISO 8601 format (article:published_time, og:video:release_date)
+- Thumbnail URLs from YouTube CDN (high resolution: 480x360px)
+- Embed URLs use YouTube's iframe API
+
+## 📊 Analytics
 
 ## 🍪 GDPR Compliance
 
