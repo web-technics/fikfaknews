@@ -7,17 +7,87 @@ $videoData = [
     'published' => '2026-01-05T00:00:00+00:00'
 ];
 $recentVideos = [];
+$channelId = 'UCkhqAfTIr2U5RU9ziyGfu_A';
+$maxVideoCacheAgeSeconds = 6 * 3600;
+
+function getLatestVideosFromYouTubeRss($channelId, $maxVideos = 10)
+{
+  $rssUrl = 'https://www.youtube.com/feeds/videos.xml?channel_id=' . rawurlencode((string) $channelId);
+  $xml = @file_get_contents($rssUrl);
+  if ($xml === false) {
+    return null;
+  }
+
+  $feed = @simplexml_load_string($xml);
+  if ($feed === false) {
+    return null;
+  }
+
+  $feed->registerXPathNamespace('atom', 'http://www.w3.org/2005/Atom');
+  $feed->registerXPathNamespace('yt', 'http://www.youtube.com/xml/schemas/2015');
+
+  $entries = $feed->xpath('//atom:entry');
+  if (!is_array($entries) || empty($entries)) {
+    return null;
+  }
+
+  $videos = [];
+  foreach ($entries as $entry) {
+    $entry->registerXPathNamespace('atom', 'http://www.w3.org/2005/Atom');
+    $entry->registerXPathNamespace('yt', 'http://www.youtube.com/xml/schemas/2015');
+
+    $videoIdNode = $entry->xpath('yt:videoId');
+    $titleNode = $entry->xpath('atom:title');
+    $publishedNode = $entry->xpath('atom:published');
+
+    if (empty($videoIdNode) || empty($titleNode) || empty($publishedNode)) {
+      continue;
+    }
+
+    $videos[] = [
+      'videoId' => (string) $videoIdNode[0],
+      'title' => (string) $titleNode[0],
+      'published' => (string) $publishedNode[0],
+    ];
+
+    if (count($videos) >= $maxVideos) {
+      break;
+    }
+  }
+
+  if (empty($videos)) {
+    return null;
+  }
+
+  return [
+    'videoId' => $videos[0]['videoId'],
+    'title' => $videos[0]['title'],
+    'published' => $videos[0]['published'],
+    'recentVideos' => array_slice($videos, 1),
+    'lastUpdated' => date('c')
+  ];
+}
+
+$decoded = null;
+$cacheIsStale = true;
 
 if (file_exists($latestVideoFile)) {
     $json = @file_get_contents($latestVideoFile);
     if ($json) {
-        $decoded = @json_decode($json, true);
+    $decoded = @json_decode($json, true);
         if ($decoded && isset($decoded['videoId'])) {
             $videoData = [
                 'videoId' => $decoded['videoId'],
                 'title' => isset($decoded['title']) ? $decoded['title'] : 'FikFak News Uitzending',
                 'published' => isset($decoded['published']) ? $decoded['published'] : date('c')
             ];
+
+      if (!empty($decoded['lastUpdated'])) {
+        $lastUpdated = strtotime((string) $decoded['lastUpdated']);
+        if ($lastUpdated !== false) {
+          $cacheIsStale = (time() - $lastUpdated) > $maxVideoCacheAgeSeconds;
+        }
+      }
 
       if (!empty($decoded['recentVideos']) && is_array($decoded['recentVideos'])) {
         $recentVideos = $decoded['recentVideos'];
@@ -26,7 +96,21 @@ if (file_exists($latestVideoFile)) {
     }
 }
 
-$baseUrl = 'https://go.fikfak.news/';
+if (!$decoded || !isset($decoded['videoId']) || $cacheIsStale) {
+  $rssData = getLatestVideosFromYouTubeRss($channelId);
+  if (is_array($rssData) && isset($rssData['videoId'])) {
+    $videoData = [
+      'videoId' => (string) $rssData['videoId'],
+      'title' => isset($rssData['title']) ? (string) $rssData['title'] : 'FikFak News Uitzending',
+      'published' => isset($rssData['published']) ? (string) $rssData['published'] : date('c')
+    ];
+    $recentVideos = !empty($rssData['recentVideos']) && is_array($rssData['recentVideos']) ? $rssData['recentVideos'] : [];
+
+    @file_put_contents($latestVideoFile, json_encode($rssData, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE));
+  }
+}
+
+$baseUrl = 'https://www.fikfak.news/';
 $requestedVideoId = isset($_GET['v']) ? trim((string) $_GET['v']) : '';
 $selectedVideo = $videoData;
 
@@ -67,12 +151,12 @@ $publishedIso = date('c', $publishedTimestamp);
 $selectedVideoId = (string) $selectedVideo['videoId'];
 $selectedTitle = trim((string) $selectedVideo['title']) !== '' ? (string) $selectedVideo['title'] : 'FikFak News Uitzending';
 $pageTitle = '📰 ' . $selectedTitle . ' | FikFak News';
-$pageDescription = '🎯 ' . $selectedTitle . ' - Bekijk de nieuwste FikFak News uitzending met onafhankelijke analyse en een kritische blik op media en politiek.';
+$pageDescription = 'Bekijk de nieuwste FikFak News uitzending met onafhankelijke analyse en een kritische blik op media en politiek.';
 $shareUrl = $baseUrl . '?v=' . rawurlencode($selectedVideoId);
-$canonicalUrl = $requestedVideoId === '' && $selectedVideoId === (string) $videoData['videoId']
-  ? $baseUrl
-  : $baseUrl . '?v=' . rawurlencode($selectedVideoId);
+$canonicalUrl = $shareUrl;
 $thumbnailUrl = 'https://i.ytimg.com/vi/' . rawurlencode($selectedVideoId) . '/hqdefault.jpg';
+$thumbnailVersion = gmdate('YmdHis', $publishedTimestamp);
+$thumbnailShareUrl = $thumbnailUrl . '?v=' . rawurlencode($thumbnailVersion);
 $embedUrl = 'https://www.youtube.com/embed/' . rawurlencode($selectedVideoId);
 $watchUrl = 'https://www.youtube.com/watch?v=' . rawurlencode($selectedVideoId);
 
@@ -81,6 +165,7 @@ $isSocialCrawler = false;
 if ($userAgent !== '') {
   $socialCrawlerSignatures = [
     'twitterbot',
+    'xbot',
     'facebookexternalhit',
     'whatsapp',
     'telegrambot',
@@ -102,11 +187,6 @@ if ($userAgent !== '') {
 header('Cache-Control: no-cache, no-store, must-revalidate, max-age=0');
 header('Pragma: no-cache');
 header('Expires: 0');
-
-if ($requestedVideoId === '' && $isSocialCrawler) {
-  header('Location: ' . $shareUrl, true, 302);
-  exit;
-}
 
 error_reporting(E_ALL);
 ini_set('display_errors', 0);
@@ -149,8 +229,8 @@ ini_set('display_errors', 0);
   <meta property="og:site_name" content="FikFak News" />
   <meta property="og:title" content="<?php echo htmlspecialchars($pageTitle, ENT_QUOTES, 'UTF-8'); ?>" />
   <meta property="og:description" content="<?php echo htmlspecialchars($pageDescription, ENT_QUOTES, 'UTF-8'); ?>" />
-  <meta property="og:image" content="<?php echo htmlspecialchars($thumbnailUrl, ENT_QUOTES, 'UTF-8'); ?>" />
-  <meta property="og:image:secure_url" content="<?php echo htmlspecialchars($thumbnailUrl, ENT_QUOTES, 'UTF-8'); ?>" />
+  <meta property="og:image" content="<?php echo htmlspecialchars($thumbnailShareUrl, ENT_QUOTES, 'UTF-8'); ?>" />
+  <meta property="og:image:secure_url" content="<?php echo htmlspecialchars($thumbnailShareUrl, ENT_QUOTES, 'UTF-8'); ?>" />
   <meta property="og:image:type" content="image/jpeg" />
   <meta property="og:image:width" content="480" />
   <meta property="og:image:height" content="360" />
@@ -166,7 +246,7 @@ ini_set('display_errors', 0);
   <meta property="og:video:tag" content="FikFak News" />
   <meta property="og:video:tag" content="Nieuws" />
   <meta property="og:video:tag" content="Journalistiek" />
-  <meta property="article:publisher" content="https://go.fikfak.news/" />
+  <meta property="article:publisher" content="https://www.fikfak.news/" />
   <meta property="article:author" content="https://www.dirktheuns.be/" />
   <meta property="article:section" content="Nieuws" />
   <meta property="article:tag" content="Nieuws" />
@@ -180,13 +260,16 @@ ini_set('display_errors', 0);
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:site" content="@dirktheuns" />
   <meta name="twitter:creator" content="@dirktheuns" />
-  <meta name="twitter:domain" content="go.fikfak.news" />
+  <meta name="twitter:domain" content="www.fikfak.news" />
   <meta name="twitter:url" content="<?php echo htmlspecialchars($shareUrl, ENT_QUOTES, 'UTF-8'); ?>" />
   <meta name="twitter:title" content="<?php echo htmlspecialchars($pageTitle, ENT_QUOTES, 'UTF-8'); ?>" />
   <meta name="twitter:description" content="<?php echo htmlspecialchars($pageDescription, ENT_QUOTES, 'UTF-8'); ?>" />
-  <meta name="twitter:image" content="<?php echo htmlspecialchars($thumbnailUrl, ENT_QUOTES, 'UTF-8'); ?>" />
-  <meta name="twitter:image:src" content="<?php echo htmlspecialchars($thumbnailUrl, ENT_QUOTES, 'UTF-8'); ?>" />
+  <meta name="twitter:image" content="<?php echo htmlspecialchars($thumbnailShareUrl, ENT_QUOTES, 'UTF-8'); ?>" />
+  <meta name="twitter:image:src" content="<?php echo htmlspecialchars($thumbnailShareUrl, ENT_QUOTES, 'UTF-8'); ?>" />
   <meta name="twitter:image:alt" content="<?php echo htmlspecialchars($selectedTitle . ' - FikFak News', ENT_QUOTES, 'UTF-8'); ?>" />
+  <meta name="twitter:player" content="<?php echo htmlspecialchars($embedUrl, ENT_QUOTES, 'UTF-8'); ?>" />
+  <meta name="twitter:player:width" content="1280" />
+  <meta name="twitter:player:height" content="720" />
   
   <!-- WhatsApp Specific Optimization -->
   <meta property="og:updated_time" content="<?php echo htmlspecialchars($publishedIso, ENT_QUOTES, 'UTF-8'); ?>" />
@@ -255,13 +338,13 @@ ini_set('display_errors', 0);
     "@graph": [
       {
         "@type": "WebSite",
-        "@id": "https://go.fikfak.news/#website",
-        "url": "https://go.fikfak.news/",
+        "@id": "https://www.fikfak.news/#website",
+        "url": "https://www.fikfak.news/",
         "name": "FikFak News",
         "alternateName": "FikFak",
         "description": "Officiële landingspagina van FikFak News met de nieuwste video van Dirk Theuns (@fikfakmaster). Onafhankelijk nieuws en actuele analyse.",
         "publisher": {
-          "@id": "https://go.fikfak.news/#organization"
+          "@id": "https://www.fikfak.news/#organization"
         },
         "inLanguage": "nl-NL",
         "about": {
@@ -271,19 +354,19 @@ ini_set('display_errors', 0);
       },
       {
         "@type": "Organization",
-        "@id": "https://go.fikfak.news/#organization",
+        "@id": "https://www.fikfak.news/#organization",
         "name": "FikFak News",
         "url": "https://fikfak.news/",
         "logo": {
           "@type": "ImageObject",
-          "@id": "https://go.fikfak.news/#logo",
-          "url": "https://go.fikfak.news/logo.png",
+          "@id": "https://www.fikfak.news/#logo",
+          "url": "https://www.fikfak.news/logo.png",
           "width": 512,
           "height": 512,
           "caption": "FikFak News Logo"
         },
         "image": {
-          "@id": "https://go.fikfak.news/#logo"
+          "@id": "https://www.fikfak.news/#logo"
         },
         "description": "Onafhankelijk nieuwsplatform met alternatieve kijk op actuele gebeurtenissen",
         "sameAs": [
@@ -295,14 +378,14 @@ ini_set('display_errors', 0);
       },
       {
         "@type": "Person",
-        "@id": "https://go.fikfak.news/#creator",
+        "@id": "https://www.fikfak.news/#creator",
         "name": "Dirk Theuns",
         "alternateName": "FikFakMaster",
         "url": "https://www.dirktheuns.be/",
         "description": "Winnaar Beste Journalist 2025. Journalist en maker van FikFak News. Brengt onafhankelijk nieuws met een kritische blik op media en politiek.",
         "image": {
           "@type": "ImageObject",
-          "url": "https://go.fikfak.news/dirk-theuns.jpg",
+          "url": "https://www.fikfak.news/dirk-theuns.jpg",
           "caption": "Dirk Theuns - Winnaar Beste Journalist 2025"
         },
         "sameAs": [
@@ -313,17 +396,17 @@ ini_set('display_errors', 0);
         "jobTitle": "Journalist",
         "award": "Beste Journalist 2025 - tScheldt",
         "worksFor": {
-          "@id": "https://go.fikfak.news/#organization"
+          "@id": "https://www.fikfak.news/#organization"
         }
       },
       {
         "@type": "WebPage",
-        "@id": "https://go.fikfak.news/#webpage",
+        "@id": "https://www.fikfak.news/#webpage",
         "url": "<?php echo htmlspecialchars($canonicalUrl, ENT_QUOTES, 'UTF-8'); ?>",
         "name": "<?php echo htmlspecialchars($pageTitle, ENT_QUOTES, 'UTF-8'); ?>",
         "description": "<?php echo htmlspecialchars($pageDescription, ENT_QUOTES, 'UTF-8'); ?>",
         "isPartOf": {
-          "@id": "https://go.fikfak.news/#website"
+          "@id": "https://www.fikfak.news/#website"
         },
         "about": {
           "@type": "Thing",
@@ -331,7 +414,7 @@ ini_set('display_errors', 0);
         },
         "primaryImageOfPage": {
           "@type": "ImageObject",
-          "@id": "https://go.fikfak.news/#primaryimage",
+          "@id": "https://www.fikfak.news/#primaryimage",
           "url": "<?php echo htmlspecialchars($thumbnailUrl, ENT_QUOTES, 'UTF-8'); ?>",
           "width": 480,
           "height": 360,
@@ -349,7 +432,7 @@ ini_set('display_errors', 0);
       },
       {
         "@type": "VideoObject",
-        "@id": "https://go.fikfak.news/#video",
+        "@id": "https://www.fikfak.news/#video",
         "name": "<?php echo htmlspecialchars($selectedTitle, ENT_QUOTES, 'UTF-8'); ?>",
         "description": "<?php echo htmlspecialchars($pageDescription, ENT_QUOTES, 'UTF-8'); ?>",
         "thumbnailUrl": "<?php echo htmlspecialchars($thumbnailUrl, ENT_QUOTES, 'UTF-8'); ?>",
@@ -357,40 +440,40 @@ ini_set('display_errors', 0);
         "contentUrl": "<?php echo htmlspecialchars($watchUrl, ENT_QUOTES, 'UTF-8'); ?>",
         "embedUrl": "<?php echo htmlspecialchars($embedUrl, ENT_QUOTES, 'UTF-8'); ?>",
         "publisher": {
-          "@id": "https://go.fikfak.news/#organization"
+          "@id": "https://www.fikfak.news/#organization"
         },
         "creator": {
-          "@id": "https://go.fikfak.news/#creator"
+          "@id": "https://www.fikfak.news/#creator"
         },
         "author": {
-          "@id": "https://go.fikfak.news/#creator"
+          "@id": "https://www.fikfak.news/#creator"
         },
         "genre": "Nieuws",
         "inLanguage": "nl-NL"
       },
       {
         "@type": "BreadcrumbList",
-        "@id": "https://go.fikfak.news/#breadcrumb",
+        "@id": "https://www.fikfak.news/#breadcrumb",
         "itemListElement": [
           {
             "@type": "ListItem",
             "position": 1,
             "name": "Home",
-            "item": "https://go.fikfak.news/"
+            "item": "https://www.fikfak.news/"
           }
         ]
       },
       {
         "@type": "NewsMediaOrganization",
-        "@id": "https://go.fikfak.news/#newsmedia",
+        "@id": "https://www.fikfak.news/#newsmedia",
         "name": "FikFak News",
         "url": "https://fikfak.news/",
         "logo": {
-          "@id": "https://go.fikfak.news/#logo"
+          "@id": "https://www.fikfak.news/#logo"
         },
         "description": "Alternatief nieuwsplatform voor onafhankelijk nieuws",
         "founder": {
-          "@id": "https://go.fikfak.news/#creator"
+          "@id": "https://www.fikfak.news/#creator"
         },
         "inLanguage": "nl-NL"
       }
@@ -1887,7 +1970,7 @@ ini_set('display_errors', 0);
       const watchOnYouTube = document.getElementById('watch-on-youtube');
       const subscribeBtn = document.getElementById('subscribe-btn');
       const playerWrap = document.getElementById('player-wrap');
-      const basePageUrl = 'https://go.fikfak.news/';
+      const basePageUrl = 'https://www.fikfak.news/';
       const initialVideoData = {
         videoId: <?php echo json_encode($selectedVideoId, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE); ?>,
         title: <?php echo json_encode($selectedTitle, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE); ?>,
@@ -2106,8 +2189,10 @@ ini_set('display_errors', 0);
       // Update social media meta tags for sharing
       function updateSocialMetaTags(videoId, title, published) {
         const embedUrl = 'https://www.youtube.com/embed/' + videoId;
-        // Use hqdefault for best compatibility (always available, 480x360)
-        const thumbUrl = 'https://img.youtube.com/vi/' + videoId + '/hqdefault.jpg';
+        // Use hqdefault for best compatibility and add stable version key per episode.
+        const publishedStamp = published ? String(published).replace(/[^0-9]/g, '').slice(0, 14) : '';
+        const thumbBaseUrl = 'https://img.youtube.com/vi/' + videoId + '/hqdefault.jpg';
+        const thumbUrl = publishedStamp ? thumbBaseUrl + '?v=' + encodeURIComponent(publishedStamp) : thumbBaseUrl;
         const pageUrl = buildSharePageUrl(videoId);
         const shareTitle = '📰 ' + title + ' | FikFak News';
         const shareDescription = '🎯 ' + title + ' - Bekijk de nieuwste FikFak News uitzending!';
@@ -2717,14 +2802,14 @@ ini_set('display_errors', 0);
     window.addEventListener('load', function() {
       const loadingScreen = document.getElementById('loading-screen');
       if (loadingScreen) {
-        // Display for 2.5 seconds before fading out
+        // Display for 1.5 seconds before fading out
         setTimeout(function() {
           loadingScreen.classList.add('loaded');
           // Remove from DOM after fade out
           setTimeout(function() {
             loadingScreen.remove();
           }, 600);
-        }, 2500);
+        }, 1500);
       }
     });
   </script>
