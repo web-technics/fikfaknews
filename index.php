@@ -114,6 +114,13 @@ $baseUrl = 'https://www.fikfak.news/';
 $requestedVideoId = isset($_GET['v']) ? trim((string) $_GET['v']) : '';
 $selectedVideo = $videoData;
 
+$requestHost = strtolower((string) ($_SERVER['HTTP_HOST'] ?? ''));
+if ($requestHost !== '' && $requestHost !== 'www.fikfak.news') {
+  $requestUri = isset($_SERVER['REQUEST_URI']) ? (string) $_SERVER['REQUEST_URI'] : '/';
+  header('Location: https://www.fikfak.news' . $requestUri, true, 301);
+  exit;
+}
+
 if ($requestedVideoId !== '' && preg_match('/^[A-Za-z0-9_-]{11}$/', $requestedVideoId)) {
   if ($requestedVideoId === (string) $videoData['videoId']) {
     $selectedVideo = $videoData;
@@ -187,6 +194,11 @@ if ($userAgent !== '') {
 header('Cache-Control: no-cache, no-store, must-revalidate, max-age=0');
 header('Pragma: no-cache');
 header('Expires: 0');
+
+if ($requestedVideoId === '' && $isSocialCrawler) {
+  header('Location: ' . $shareUrl, true, 302);
+  exit;
+}
 
 error_reporting(E_ALL);
 ini_set('display_errors', 0);
