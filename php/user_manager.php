@@ -1,17 +1,30 @@
 <?php
 session_start();
-if (!isset($_SESSION['user_id']) || $_SESSION['username'] !== 'fikfak-admin') {
-    header('Location: login.php');
-    exit;
-}
-
 $host = 'localhost';
 $db   = 'ffgo';
 $user = 'ffgo';
 $pass = 'wN5eHEbwTuFxppi4KLpg';
 $mysqli = new mysqli($host, $user, $pass, $db);
 if ($mysqli->connect_errno) {
-    die('Connect Error: ' . $mysqli->connect_error);
+  die('Connect Error: ' . $mysqli->connect_error);
+}
+
+if (!isset($_SESSION['user_id'])) {
+    header('Location: login.php');
+    exit;
+}
+
+// Role-based admin check
+$roleStmt = $mysqli->prepare('SELECT role FROM users WHERE id = ? LIMIT 1');
+$roleStmt->bind_param('i', $_SESSION['user_id']);
+$roleStmt->execute();
+$roleStmt->bind_result($role);
+$roleStmt->fetch();
+$roleStmt->close();
+if ($role !== 'admin') {
+  $mysqli->close();
+  header('Location: login.php');
+  exit;
 }
 
 // Filtering
@@ -114,7 +127,7 @@ $mysqli->close();
         window.location.href = 'edit_user.php?id=' + id;
       }
       function resetPw(id) {
-        if(confirm('Force password reset for this user?')) {
+        if(confirm('Genereer een reset-link die je direct aan deze gebruiker kunt doorsturen?')) {
           window.location.href = 'reset_pw.php?id=' + id;
         }
       }
@@ -138,7 +151,7 @@ $mysqli->close();
     <div style="margin-bottom:10px; color:var(--muted); font-size:15px;">
       <strong>Uitleg acties:</strong><br>
       <b>Bewerk</b>: Pas gebruikersnaam, e-mail of badges aan.<br>
-      <b>Reset PW</b>: Forceer een wachtwoord reset voor deze gebruiker.<br>
+      <b>Reset-link</b>: Maak een veilige reset-link aan om naar deze gebruiker door te sturen.<br>
       <b>Verwijder</b>: Verwijder deze gebruiker definitief uit het systeem.
     </div>
     <table class="user-table">
@@ -151,7 +164,7 @@ $mysqli->close();
         <td><?php echo htmlspecialchars($user['created_at']); ?></td>
         <td>
           <button class="action-btn" style="margin-bottom:6px;" onclick="editUser(<?php echo $user['id']; ?>)">Bewerk</button>
-          <button class="action-btn" style="margin-bottom:6px;" onclick="resetPw(<?php echo $user['id']; ?>)">Reset PW</button>
+          <button class="action-btn" style="margin-bottom:6px;" onclick="resetPw(<?php echo $user['id']; ?>)">Reset-link</button>
           <button class="action-btn" style="margin-bottom:6px;" onclick="delUser(<?php echo $user['id']; ?>)">Verwijder</button>
         </td>
       </tr>
