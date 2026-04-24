@@ -1,4 +1,6 @@
 <?php
+session_start();
+
 // Dynamic Meta Tags for Latest Video
 $latestVideoFile = __DIR__ . '/latest-video.json';
 $videoData = [
@@ -157,6 +159,8 @@ if ($publishedTimestamp === false) {
 $publishedIso = date('c', $publishedTimestamp);
 $selectedVideoId = (string) $selectedVideo['videoId'];
 $selectedTitle = trim((string) $selectedVideo['title']) !== '' ? (string) $selectedVideo['title'] : 'FikFak News Uitzending';
+$accountUsername = trim((string) ($_SESSION['username'] ?? ''));
+$isLoggedIn = isset($_SESSION['user_id']) && (int) $_SESSION['user_id'] > 0;
 $pageTitle = '📰 ' . $selectedTitle . ' | FikFak News';
 $pageDescription = 'Bekijk de nieuwste FikFak News uitzending met onafhankelijke analyse en een kritische blik op media en politiek.';
 $shareUrl = $baseUrl . '?v=' . rawurlencode($selectedVideoId);
@@ -770,6 +774,15 @@ ini_set('display_errors', 0);
     .social-link{display:inline-flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:8px;background:rgba(255,255,255,0.01);margin-left:8px;color:var(--muted);text-decoration:none;min-width:44px;min-height:44px;touch-action:manipulation;}
     .social-link svg{width:18px;height:18px;fill:currentColor}
     .social-link:hover{background:rgba(255,255,255,0.02);color:var(--accent)}
+    .account-nav-panel{display:inline-flex;align-items:center;justify-content:flex-end;gap:10px;flex-wrap:wrap;padding:8px 10px;border-radius:999px;background:linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.03));border:1px solid rgba(255,255,255,0.08);box-shadow:0 10px 24px rgba(0,0,0,0.24)}
+    .account-nav-label{color:#d7e5f7;font-size:12px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;white-space:nowrap}
+    .account-nav-user{color:#ffffff;font-size:13px;font-weight:600;white-space:nowrap;max-width:180px;overflow:hidden;text-overflow:ellipsis}
+    .account-nav-links{display:flex;align-items:center;justify-content:flex-end;gap:8px;flex-wrap:wrap}
+    .account-nav-link{display:inline-flex;align-items:center;justify-content:center;min-height:40px;padding:10px 14px;border-radius:999px;text-decoration:none;font-size:13px;font-weight:700;transition:transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease, color 0.2s ease;white-space:nowrap}
+    .account-nav-link:hover{transform:translateY(-1px);box-shadow:0 8px 18px rgba(0,0,0,0.2)}
+    .account-nav-link-primary{background:linear-gradient(135deg,var(--accent),#4ea0ff);color:#fff}
+    .account-nav-link-secondary{background:rgba(255,255,255,0.06);color:#e6eef6;border:1px solid rgba(255,255,255,0.08)}
+    .account-nav-link-ghost{color:#e6eef6;border:1px solid rgba(255,255,255,0.1);background:transparent}
     @media (max-width:640px){.footer-grid{flex-direction:column;align-items:center;gap:8px}.footer-social{text-align:center}.social-link{margin-left:6px;margin-right:6px}.footer-logo{max-height:40px}.webtechnics-logo{max-height:40px;padding:4px}}
 
     /* Bank transfer modal */
@@ -884,6 +897,8 @@ ini_set('display_errors', 0);
     @media (max-width: 640px) {
       nav ul li:first-child { gap:12px; }
       .social-link { margin:0 4px; }
+      .account-nav-panel { justify-content:center; }
+      .account-nav-links { justify-content:center; width:100%; }
     }
     
     @media (max-width: 420px) {
@@ -1256,9 +1271,26 @@ ini_set('display_errors', 0);
             </picture>
           </a>
         </li>
-        <!-- Right: Contact Link -->
+        <!-- Right: Account + Contact -->
         <li style="flex:1;text-align:right;">
-          <a href="#contact" style="color:#e6eef6;text-decoration:none;font-size:14px;font-weight:500;transition:color 0.2s ease;border-bottom:1px solid #e6eef6;padding-bottom:4px;" aria-label="Ga naar contactformulier">Contact</a>
+          <div class="account-nav-panel">
+            <?php if ($isLoggedIn): ?>
+              <span class="account-nav-label">Account</span>
+              <span class="account-nav-user"><?php echo htmlspecialchars($accountUsername !== '' ? $accountUsername : 'Ingelogd'); ?></span>
+              <div class="account-nav-links">
+                <a href="php/dashboard.php" class="account-nav-link account-nav-link-primary">Mijn account</a>
+                <a href="php/logout.php" class="account-nav-link account-nav-link-secondary">Uitloggen</a>
+                <a href="#contact" class="account-nav-link account-nav-link-ghost" aria-label="Ga naar contactformulier">Contact</a>
+              </div>
+            <?php else: ?>
+              <span class="account-nav-label">Leden</span>
+              <div class="account-nav-links">
+                <a href="php/login.php" class="account-nav-link account-nav-link-primary">Inloggen</a>
+                <a href="php/register.php" class="account-nav-link account-nav-link-secondary">Registreren</a>
+                <a href="#contact" class="account-nav-link account-nav-link-ghost" aria-label="Ga naar contactformulier">Contact</a>
+              </div>
+            <?php endif; ?>
+          </div>
         </li>
       </ul>
     </nav>
