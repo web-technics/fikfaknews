@@ -1,159 +1,147 @@
-# 📰 FikFak News - Landing Page
+# FikFak News Site
 
-Modern, fast, and secure landing page for FikFak News (@fikfakmaster) - Alternative news by journalist Dirk Theuns, winner of "Beste Journalist 2025".
+Public website and member platform for FikFak News. This repository now covers both the public landing page and the account system used on `go.fikfak.news`, including legacy WordPress member sync, member login, admin management, and password reset flows.
 
-## 🚀 Features
+## Features
 
-- **YouTube Integration**: Automatic latest video feed from channel
-- **Responsive Design**: Mobile-first, optimized for all devices
-- **Performance**: Lazy loading, GZIP compression, browser caching
-- **Security**: HTTPS enforced, CSP headers, HSTS, rate limiting
-- **Accessibility**: WCAG 2.1 AA compliant with ARIA labels
-- **SEO Optimized**: Comprehensive meta tags, Open Graph, structured data, Twitter Cards
-- **Social Sharing**: Dynamic meta tags ensure latest video always displays on Facebook, WhatsApp, Twitter, Telegram
-- **GDPR Compliant**: Cookie consent banner with granular controls
-- **Analytics**: Google Analytics 4 with event tracking
+- Public homepage with latest YouTube video, social metadata, analytics, and donation/contact flows
+- Member registration, login, logout, profile, and dashboard pages
+- Admin dashboard with user metrics and legacy sync health checks
+- Legacy WordPress and ARMember import/sync into the new `users` table
+- Transparent login support for imported WordPress password hashes
+- Password reset flow for migrated accounts that do not yet have a usable password
+- Cron-based sync tooling for keeping legacy signups aligned with the new platform
 
-## 📁 Structure
+## Project Structure
 
+```text
+fikfak-news/
+├── index.php                  # Public homepage and social sharing entry point
+├── update-latest-video.php    # Updates latest-video.json from YouTube
+├── latest-video.json          # Cached latest and recent YouTube videos
+├── privacy-policy.html        # Privacy policy
+├── .htaccess                  # Apache/LiteSpeed rewrite, cache, and security rules
+├── assets/                    # Shared images, CSS, and favicons
+├── archive/                   # Archive-facing static assets/pages
+└── php/
+    ├── login.php              # Member login with WordPress hash compatibility
+    ├── register.php           # New member registration
+    ├── logout.php             # Session logout
+    ├── forgot_pw.php          # Reset request flow
+    ├── set_new_pw.php         # Set a new password from reset token
+    ├── dashboard.php          # Member dashboard
+    ├── profile.php            # Member profile editor
+    ├── admin_dashboard.php    # Admin metrics and sync status overview
+    ├── user_manager.php       # User list and admin actions
+    ├── reset_pw.php           # Admin-generated reset link helper
+    ├── import_users.php       # Manual legacy import/upsert tool
+    ├── sync_users.php         # Cron-safe recurring legacy sync script
+    ├── send_contact.php       # Contact form handler
+    ├── send_bank.php          # Bank transfer/support form handler
+    └── wp-password-compat.php # WordPress legacy password compatibility
 ```
-go.fikfak.news/
-├── index.php               # Main landing page (dynamic latest video + social metadata)
-├── latest-video.json       # Cached latest/recent YouTube videos
-├── update-latest-video.php # Cron updater for latest-video.json
-├── privacy-policy.html     # Privacy policy page
-├── .htaccess              # Apache configuration (caching, security)
-├── assets/
-│   ├── images/            # Logo, banners, images
-│   └── favicons/          # Favicon and web manifest
-├── php/
-│   ├── send_contact.php   # Contact form handler
-│   └── send_bank.php      # Bank transfer form handler
-└── archive/               # Archive section (if needed)
+
+## Stack
+
+- PHP 8.x
+- MySQL / MariaDB
+- Apache or LiteSpeed with `.htaccess`
+- YouTube RSS feed for latest video discovery
+- Google Analytics 4
+
+## Account System
+
+The account platform is intended to replace member access on the old WordPress site while subscriptions may still remain there temporarily.
+
+- Existing WordPress members can usually log in with their existing email and password
+- Successful login with a legacy WordPress hash upgrades that password storage to a current bcrypt hash
+- Users imported without a usable password must use the reset flow once
+- Admins can generate reset links from the user manager instead of handing out random passwords
+
+## Legacy Sync Flow
+
+The repository contains two legacy migration tools:
+
+- `php/import_users.php`
+  Use for manual import/upsert runs when you want to bring over older member data in bulk.
+
+- `php/sync_users.php`
+  Use for recurring cron sync so new signups that still happen on the old WordPress site are copied into the new system.
+
+The sync writes `php/sync_meta.json`, which is displayed in the admin dashboard so you can see last run time, inserted/updated/skipped counts, and errors.
+
+## Setup
+
+### Basic Deployment
+
+1. Clone the repository.
+
+```bash
+git clone https://github.com/web-technics/fikfak-news.git
+cd fikfak-news
 ```
 
-## 🛠️ Tech Stack
+2. Configure your database connection values in the PHP account files.
 
-- **Frontend**: HTML5, CSS3, Vanilla JavaScript
-- **Backend**: PHP 8.x (for forms)
-- **Server**: Apache/LiteSpeed with .htaccess
-- **APIs**: YouTube RSS Feed, Google Analytics 4
-- **Forms**: Brevo (Sendinblue) newsletter integration
+3. Configure mail/form handling in `php/send_contact.php` and `php/send_bank.php` if needed.
 
-## ⚙️ Setup
+4. Deploy to your web root and ensure PHP, MySQL, and Apache/LiteSpeed rewrite support are enabled.
 
-### Basic Installation
-1. **Clone the repository:**
-   ```bash
-   git clone https://github.com/web-technics/fikfak-news.git
-   cd fikfak-news
-   ```
+5. Make sure HTTPS is valid for the domain you serve.
 
-2. **Configure PHP forms:**
-   - Edit `php/send_contact.php` and `php/send_bank.php`
-   - Set your email address for form submissions
+### Video Update Cron
 
-3. **Deploy:**
-   - Upload to your web server's document root
-   - Ensure Apache mod_rewrite, mod_headers, mod_deflate are enabled
-   - HTTPS/SSL certificate required
+To keep social metadata aligned with the latest broadcast, run `update-latest-video.php` on a schedule that fits your publishing cadence.
 
-### Automatic Video Updates (Cron)
-To keep the latest video metadata current for social sharing:
+Example:
 
-1. **Set up a cron job** to run `update-latest-video.php` periodically:
-   ```bash
-   */10 * * * 0 8-9 /usr/bin/php /path/to/update-latest-video.php
-   ```
-   This updates every 10 minutes on Sunday mornings (8-9am CET) before the 8am broadcast.
+```bash
+*/10 * * * 0 8-9 /usr/bin/php /path/to/update-latest-video.php
+```
 
-2. **YouTube API Key (Optional):**
-   - Add your YouTube Data API key to `update-latest-video.php` for faster updates
-   - Falls back to YouTube RSS feed if API key is missing or fails
+### Legacy Member Sync Cron
 
-3. **Verify operation:**
-   - Check `latest-video.json` file was updated with your latest video
-   - File should contain: videoId, title, published date, and recentVideos array
+To keep the new account database aligned with the old WordPress site:
 
-## 🔒 Security Features
+```bash
+0 * * * * /usr/bin/php /path/to/php/sync_users.php >> /path/to/php/sync_users.log 2>&1
+```
 
-- HTTPS enforcement with HSTS
-- Content Security Policy (CSP)
-- X-Frame-Options, X-XSS-Protection headers
-- Rate limiting on forms (60-second cooldown)
-- Honeypot spam protection
-- Secure cookie flags (SameSite=Strict)
+After first deployment, run it once manually to bootstrap the sync immediately:
 
-## 📊 Analytics
+```bash
+php /path/to/php/sync_users.php
+```
 
-Google Analytics 4 tracking includes:
-- Video selection events
-- Form submissions
-- Newsletter signups
-- Contact/donation modal interactions
+## Admin Area
 
-## 📱 Social Sharing Optimization
+The admin area currently provides:
 
-Every broadcast automatically optimizes for social media sharing:
+- Total users and recent signup counts
+- Accounts without passwords
+- WordPress-compatible hash counts versus bcrypt counts
+- Legacy email coverage metrics across WordPress and ARMember tables
+- Last sync status and runtime metadata
+- User search, edit, delete, and reset-link actions
 
-**Dynamic Meta Tags:**
-- Automatically detects latest video from `latest-video.json`
-- Serves correct Open Graph tags (og:title, og:description, og:image, og:video)
-- Includes video-specific metadata: duration, release date, tags
-- Supports all major video metadata standards
+## Security Notes
 
-**Platform-Specific Support:**
-- **Facebook & WhatsApp**: Rich preview with video thumbnail and description
-- **Twitter**: Summary card with large image
-- **Telegram**: Video link preview with metadata
-- **Discord**: Embedded video preview with proper dimensions
-- **LinkedIn**: Article-style preview with video link
+- HTTPS enforcement and security headers are configured in `.htaccess`
+- Login supports legacy WordPress hashes without exposing them
+- Password reset uses token-based links with expiry
+- Admin access is role-based, not username-name based
 
-**Auto-Redirect for Social Crawlers:**
-- Root URL (`/`) redirects social crawlers to latest video URL with `?v=[videoId]`
-- Ensures consistent metadata in social shares
-- Happens server-side before JavaScript execution (crawler-friendly)
+## Links
 
-**Implementation Details:**
-- Latest video stored in `latest-video.json` (updated by `update-latest-video.php` cron)
-- Client-side meta tag updates when users manually switch videos
-- All timestamps in ISO 8601 format (article:published_time, og:video:release_date)
-- Thumbnail URLs from YouTube CDN (high resolution: 480x360px)
-- Embed URLs use YouTube's iframe API
+- Website: https://go.fikfak.news
+- Legacy WordPress site: https://fikfak.news
+- YouTube: https://www.youtube.com/@fikfakmaster
+- Facebook: https://www.facebook.com/groups/vriendenvandirktheuns
+- X: https://x.com/dirktheuns
 
-## 📊 Analytics
-
-## 🍪 GDPR Compliance
-
-- Cookie consent banner on first visit
-- Privacy policy page with full disclosure
-- Granular cookie controls (Essential, Analytics, Marketing)
-- Compliant with GDPR, Dutch AVG, and Belgian privacy law
-
-## 🚀 Performance
-
-- **Load Time**: < 2 seconds
-- **Video Feed**: 1-5 seconds (parallel API race)
-- **Caching**: 1-year for assets, 1-hour for HTML
-- **Compression**: GZIP enabled
-- **Lazy Loading**: Images load on demand
-
-## 📝 License
+## License
 
 © 2026 FikFak News / Dirk Theuns. All rights reserved.
 
-## 🔗 Links
-
-- **Website**: https://go.fikfak.news
-- **Old WordPress Site**: https://fikfak.news (legacy subscriptions only)
-- **YouTube**: [@fikfakmaster](https://www.youtube.com/@fikfakmaster)
-- **Facebook**: [Vrienden van Dirk Theuns](https://www.facebook.com/groups/vriendenvandirktheuns)
-- **X/Twitter**: [@dirktheuns](https://x.com/dirktheuns)
-
-## 📧 Contact
-
-For technical issues or inquiries, use the contact form on the website.
-
----
-
-**Status**: ✅ Production Ready | Last Updated: February 2026
+Status: Production active
+Last updated: April 2026
