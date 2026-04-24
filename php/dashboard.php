@@ -5,8 +5,26 @@ if (!isset($_SESSION['user_id'])) {
     exit;
 }
 
-$username = $_SESSION['username'] ?? 'User';
-$is_admin = ($username === 'fikfak-admin');
+$host = 'localhost';
+$db   = 'ffgo';
+$user = 'ffgo';
+$pass = 'wN5eHEbwTuFxppi4KLpg';
+$mysqli = new mysqli($host, $user, $pass, $db);
+if ($mysqli->connect_errno) {
+    die('Connect Error: ' . $mysqli->connect_error);
+}
+
+$stmt = $mysqli->prepare('SELECT username, role FROM users WHERE id = ? LIMIT 1');
+$stmt->bind_param('i', $_SESSION['user_id']);
+$stmt->execute();
+$stmt->bind_result($_db_username, $_db_role);
+$stmt->fetch();
+$stmt->close();
+$mysqli->close();
+
+$username = $_db_username ?? ($_SESSION['username'] ?? 'User');
+$_SESSION['username'] = $username;
+$is_admin = ($_db_role === 'admin');
 ?>
 <!DOCTYPE html>
 <html lang="en">

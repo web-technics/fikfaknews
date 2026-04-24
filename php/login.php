@@ -16,24 +16,17 @@ if ($mysqli->connect_errno) {
 
 // WordPress password check function
 function wp_check_password($password, $hash) {
-    echo '<pre style="color:purple;">DEBUG: Checking hash: ' . htmlspecialchars($hash) . "\nPassword: " . htmlspecialchars($password) . "</pre>";
     // Support for $wp$2y$... (WordPress bcrypt plugin hashes)
     if (strpos($hash, '$wp$2y$') === 0) {
         $realHash = substr($hash, 3); // Remove the 'wp' prefix, keep $2y$...
-        $result = password_verify($password, $realHash);
-        echo '<pre style="color:purple;">DEBUG: password_verify($password, $realHash) result: ' . ($result ? 'OK' : 'FAIL') . '</pre>';
-        return $result;
+        return password_verify($password, $realHash);
     }
     // Native bcrypt
     if (strlen($hash) == 60 && preg_match('/^\$2y\$/', $hash)) {
-        $result = password_verify($password, $hash);
-        echo '<pre style="color:purple;">DEBUG: password_verify($password, $hash) result: ' . ($result ? 'OK' : 'FAIL') . '</pre>';
-        return $result;
+        return password_verify($password, $hash);
     }
     require_once __DIR__ . '/wp-password-compat.php';
-    $result = wp_check_password_compat($password, $hash);
-    echo '<pre style="color:purple;">DEBUG: wp_check_password_compat result: ' . ($result ? 'OK' : 'FAIL') . '</pre>';
-    return $result;
+    return wp_check_password_compat($password, $hash);
 }
 
 // Handle login
@@ -46,11 +39,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $stmt->execute();
     $result = $stmt->get_result();
     if ($user = $result->fetch_assoc()) {
-        echo '<pre style="color:blue;">DEBUG: User found: ' . htmlspecialchars($user['username']) . ' / ' . htmlspecialchars($user['email']) . "\n";
-        echo 'Password hash: ' . htmlspecialchars($user['password']) . "\n";
-        echo 'Password entered: ' . htmlspecialchars($password) . "\n";
         $pass_result = ($user['password'] && wp_check_password($password, $user['password']));
-        echo 'Password check result: ' . ($pass_result ? 'OK' : 'FAIL') . "</pre>";
         if ($pass_result) {
             $_SESSION['user_id'] = $user['id'];
             $_SESSION['username'] = $user['username'];
@@ -64,7 +53,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $error = 'Invalid password.';
         }
     } else {
-        echo '<pre style="color:red;">DEBUG: User not found for input: ' . htmlspecialchars($login) . "</pre>";
         $error = 'User not found.';
     }
     $stmt->close();
