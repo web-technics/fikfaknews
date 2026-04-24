@@ -112,16 +112,12 @@ if (!$decoded || !isset($decoded['videoId']) || $cacheIsStale) {
   }
 }
 
-$baseUrl = 'https://www.fikfak.news/';
+$baseUrl = 'https://go.fikfak.news/';
 $requestedVideoId = isset($_GET['v']) ? trim((string) $_GET['v']) : '';
 $selectedVideo = $videoData;
 
 $requestHost = strtolower((string) ($_SERVER['HTTP_HOST'] ?? ''));
-if ($requestHost !== '' && $requestHost !== 'www.fikfak.news') {
-  $requestUri = isset($_SERVER['REQUEST_URI']) ? (string) $_SERVER['REQUEST_URI'] : '/';
-  header('Location: https://www.fikfak.news' . $requestUri, true, 301);
-  exit;
-}
+// Emergency safety mode: avoid any cross-host redirect here to prevent loops.
 
 if ($requestedVideoId !== '' && preg_match('/^[A-Za-z0-9_-]{11}$/', $requestedVideoId)) {
   if ($requestedVideoId === (string) $videoData['videoId']) {

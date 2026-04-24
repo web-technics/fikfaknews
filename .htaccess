@@ -1,10 +1,9 @@
-# Force HTTPS + canonical host (www.fikfak.news) before PHP
+# Emergency-safe HTTPS redirect only (no host canonicalization)
 <IfModule mod_rewrite.c>
   RewriteEngine On
 
-  RewriteCond %{HTTPS} off [OR]
-  RewriteCond %{HTTP_HOST} !^www\.fikfak\.news$ [NC]
-  RewriteRule ^ https://www.fikfak.news%{REQUEST_URI} [L,R=301]
+  RewriteCond %{HTTPS} off
+  RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
 </IfModule>
 
 # Enable GZIP Compression
