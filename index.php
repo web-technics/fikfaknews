@@ -564,6 +564,124 @@ ini_set('display_errors', 0);
       border-radius:12px;
       box-shadow: 0 8px 32px rgba(0,0,0,0.4), 0 4px 16px rgba(28,99,207,0.15), 0 0 1px rgba(255,255,255,0.1);
     }
+    .event-promo{
+      width:100%;
+      max-width:var(--max-width);
+      margin:0 auto 20px;
+      padding:24px;
+      border-radius:18px;
+      background:
+        radial-gradient(circle at top left, rgba(255,255,255,0.16), transparent 36%),
+        linear-gradient(135deg, rgba(28,99,207,0.22), rgba(8,20,35,0.95) 55%, rgba(255,184,107,0.16));
+      border:1px solid rgba(255,255,255,0.08);
+      box-shadow:0 18px 42px rgba(2,6,23,0.32);
+      overflow:hidden;
+    }
+    .event-promo-grid{
+      display:grid;
+      grid-template-columns:minmax(0, 1.05fr) minmax(0, 0.95fr);
+      gap:18px;
+      align-items:stretch;
+    }
+    .event-promo-media{
+      position:relative;
+      display:block;
+      min-height:100%;
+      border-radius:14px;
+      overflow:hidden;
+      background:#0a1424;
+      box-shadow:0 16px 34px rgba(0,0,0,0.28);
+    }
+    .event-promo-media img{
+      width:100%;
+      height:100%;
+      display:block;
+      object-fit:cover;
+    }
+    .event-promo-copy{
+      display:flex;
+      flex-direction:column;
+      justify-content:center;
+      gap:14px;
+    }
+    .event-kicker{
+      display:inline-flex;
+      align-items:center;
+      width:fit-content;
+      padding:7px 12px;
+      border-radius:999px;
+      background:rgba(255,255,255,0.1);
+      color:#f5f7fb;
+      font-size:12px;
+      font-weight:800;
+      letter-spacing:0.12em;
+      text-transform:uppercase;
+    }
+    .event-promo-copy h3{
+      margin:0;
+      font-size:30px;
+      line-height:1.05;
+      color:#ffffff;
+    }
+    .event-promo-copy p{
+      margin:0;
+      color:#d8e1ee;
+      font-size:15px;
+      line-height:1.65;
+    }
+    .event-meta-list{
+      display:grid;
+      grid-template-columns:repeat(2, minmax(0, 1fr));
+      gap:10px;
+      margin:0;
+      padding:0;
+      list-style:none;
+    }
+    .event-meta-item{
+      min-height:78px;
+      padding:12px 14px;
+      border-radius:14px;
+      background:rgba(255,255,255,0.08);
+      border:1px solid rgba(255,255,255,0.08);
+    }
+    .event-meta-label{
+      display:block;
+      margin-bottom:6px;
+      color:#c0d0e4;
+      font-size:11px;
+      font-weight:700;
+      letter-spacing:0.1em;
+      text-transform:uppercase;
+    }
+    .event-meta-value{
+      color:#ffffff;
+      font-size:17px;
+      font-weight:800;
+      line-height:1.3;
+    }
+    .event-cta-row{
+      display:flex;
+      gap:12px;
+      flex-wrap:wrap;
+      align-items:center;
+    }
+    .event-cta-row .btn{
+      min-width:180px;
+    }
+    .event-cta-row .btn-outline{
+      color:#ffffff;
+      border-color:rgba(255,255,255,0.2);
+      background:rgba(255,255,255,0.05);
+    }
+    .event-cta-row .btn-outline:hover{
+      color:#ffffff;
+      border-color:rgba(255,255,255,0.32);
+      background:rgba(255,255,255,0.1);
+    }
+    .event-footnote{
+      color:#cbd5e1;
+      font-size:12px;
+    }
     .iframe-wrap{
       position:relative;
       padding-top:56.25%;
@@ -654,6 +772,12 @@ ini_set('display_errors', 0);
       .meta { flex-direction:column; align-items:flex-start; gap:10px; }
       .channel-actions { width:100%; }
       .channel-actions .btn { width:100%; }
+      .event-promo { padding:16px 12px; border-radius:16px; }
+      .event-promo-grid { grid-template-columns:1fr; }
+      .event-promo-copy h3 { font-size:24px; }
+      .event-meta-list { grid-template-columns:1fr; }
+      .event-cta-row { flex-direction:column; align-items:stretch; }
+      .event-cta-row .btn { width:100%; min-width:0; }
     }
 
     /* Ultra small screens - keep things compact */
@@ -665,6 +789,9 @@ ini_set('display_errors', 0);
       .thumb img { width:76px; height:44px; }
       .muted { font-size:12px; }
       .btn { padding:8px 12px; font-size:13px; }
+      .event-promo-copy h3 { font-size:21px; }
+      .event-meta-item { min-height:0; }
+      .event-meta-value { font-size:16px; }
     }
 
     /* Steun Fikfak News - support section styling (two-column) */
@@ -770,10 +897,10 @@ ini_set('display_errors', 0);
     .social-link{display:inline-flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:8px;background:rgba(255,255,255,0.01);margin-left:8px;color:var(--muted);text-decoration:none;min-width:44px;min-height:44px;touch-action:manipulation;}
     .social-link svg{width:18px;height:18px;fill:currentColor}
     .social-link:hover{background:rgba(255,255,255,0.02);color:var(--accent)}
-    .account-nav-panel{display:inline-flex;align-items:center;justify-content:flex-end;gap:10px;flex-wrap:wrap;padding:8px 10px;border-radius:999px;background:linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.03));border:1px solid rgba(255,255,255,0.08);box-shadow:0 10px 24px rgba(0,0,0,0.24)}
+    .account-nav-panel{display:inline-flex;align-items:center;justify-content:flex-end;gap:10px;flex-wrap:nowrap;padding:7px 9px;border-radius:999px;background:linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.03));border:1px solid rgba(255,255,255,0.08);box-shadow:0 10px 24px rgba(0,0,0,0.24);width:fit-content;max-width:100%;margin-left:auto}
     .account-nav-label{color:#d7e5f7;font-size:12px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;white-space:nowrap}
     .account-nav-user{color:#ffffff;font-size:13px;font-weight:600;white-space:nowrap;max-width:180px;overflow:hidden;text-overflow:ellipsis}
-    .account-nav-links{display:flex;align-items:center;justify-content:flex-end;gap:8px;flex-wrap:wrap}
+    .account-nav-links{display:flex;align-items:center;justify-content:flex-end;gap:8px;flex-wrap:nowrap}
     .account-nav-link{display:inline-flex;align-items:center;justify-content:center;min-height:40px;padding:10px 14px;border-radius:999px;text-decoration:none;font-size:13px;font-weight:700;transition:transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease, color 0.2s ease;white-space:nowrap}
     .account-nav-link:hover{transform:translateY(-1px);box-shadow:0 8px 18px rgba(0,0,0,0.2)}
     .account-nav-link-primary{background:linear-gradient(135deg,var(--accent),#4ea0ff);color:#fff}
@@ -1268,7 +1395,7 @@ ini_set('display_errors', 0);
           </a>
         </li>
         <!-- Right: Account + Contact -->
-        <li style="flex:1;text-align:right;">
+        <li style="flex:1;display:flex;justify-content:flex-end;">
           <div class="account-nav-panel">
             <?php if ($isLoggedIn): ?>
               <span class="account-nav-label">Account</span>
@@ -1276,14 +1403,12 @@ ini_set('display_errors', 0);
               <div class="account-nav-links">
                 <a href="php/dashboard.php" class="account-nav-link account-nav-link-primary">Mijn account</a>
                 <a href="php/logout.php" class="account-nav-link account-nav-link-secondary">Uitloggen</a>
-                <a href="#contact" class="account-nav-link account-nav-link-ghost" aria-label="Ga naar contactformulier">Contact</a>
               </div>
             <?php else: ?>
               <span class="account-nav-label">Leden</span>
               <div class="account-nav-links">
                 <a href="php/login.php" class="account-nav-link account-nav-link-primary">Inloggen</a>
                 <a href="php/register.php" class="account-nav-link account-nav-link-secondary">Registreren</a>
-                <a href="#contact" class="account-nav-link account-nav-link-ghost" aria-label="Ga naar contactformulier">Contact</a>
               </div>
             <?php endif; ?>
           </div>
@@ -1353,6 +1478,45 @@ ini_set('display_errors', 0);
         </picture>
       </a>
     </div>
+    <section class="event-promo" aria-labelledby="event-promo-heading">
+      <div class="event-promo-grid">
+        <a class="event-promo-media" href="https://www.opdatemetjezelf.be/shop" target="_blank" rel="noopener noreferrer" aria-label="Bekijk tickets voor het Fikfak Zomerfeest">
+          <img src="assets/images/fikfak_zomerfeest_21_juni_BARN64.jpg" alt="Poster voor het Fikfak Zomerfeest met Mattias Desmet en Dirk Theuns" loading="lazy" width="768" height="768">
+        </a>
+
+        <div class="event-promo-copy">
+          <span class="event-kicker">Live Event</span>
+          <h3 id="event-promo-heading">Fikfak Zomerfeest met Mattias Desmet en Dirk Theuns</h3>
+          <p>een live avond rond bewustzijn, ontmoeting en muziek.</p>
+
+          <ul class="event-meta-list" aria-label="Praktische info Fikfak Zomerfeest">
+            <li class="event-meta-item">
+              <span class="event-meta-label">Datum</span>
+              <span class="event-meta-value">Zondag 21 juni</span>
+            </li>
+            <li class="event-meta-item">
+              <span class="event-meta-label">Startuur</span>
+              <span class="event-meta-value">15u00</span>
+            </li>
+            <li class="event-meta-item">
+              <span class="event-meta-label">Locatie</span>
+              <span class="event-meta-value">Barn64, Brasschaat</span>
+            </li>
+            <li class="event-meta-item">
+              <span class="event-meta-label">Tickets</span>
+              <span class="event-meta-value">24 euro</span>
+            </li>
+          </ul>
+
+          <div class="event-cta-row">
+            <a class="btn" href="https://www.opdatemetjezelf.be/shop" target="_blank" rel="noopener noreferrer">Bestel Tickets</a>
+            <a class="btn btn-outline" href="assets/images/fikfak_zomerfeest_21_juni_BARN64.jpg" target="_blank" rel="noopener noreferrer">Bekijk Poster</a>
+          </div>
+
+          <div class="event-footnote">Genieten, luisteren en dansen. Rechtstreeks gelinkt aan de shop op opdatemetjezelf.be.</div>
+        </div>
+      </div>
+    </section>
     <!-- Steun Fikfak News (volledige breedte onder video's) -->
     <section class="support-card" id="support" aria-labelledby="support-heading">
       <h2 id="support-heading" style="text-align:center;margin:0 0 20px;font-size:28px;font-weight:800;color:#fff;text-transform:uppercase;letter-spacing:0.5px;">💰 Steun Fikfak News</h2>
@@ -1679,6 +1843,9 @@ ini_set('display_errors', 0);
           <div class="footer-text">Met liefde gemaakt voor en door fikfakkers</div>
         </div>
         <div class="footer-col footer-social">
+          <a href="#contact" class="social-link" aria-label="Contact" title="Contact">
+            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M3 6.75A2.75 2.75 0 0 1 5.75 4h12.5A2.75 2.75 0 0 1 21 6.75v10.5A2.75 2.75 0 0 1 18.25 20H5.75A2.75 2.75 0 0 1 3 17.25V6.75zm2.2-.75 6.8 5.2 6.8-5.2H5.2zm13.8 2.26-6.4 4.9a1 1 0 0 1-1.2 0l-6.4-4.9v8.99c0 .41.34.75.75.75h12.5c.41 0 .75-.34.75-.75V8.26z"/></svg>
+          </a>
           <a href="https://www.facebook.com/groups/vriendenvandirktheuns" target="_blank" rel="noopener" class="social-link" aria-label="Facebook" title="Facebook">
             <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M22 12.07C22 6.48 17.52 2 12 2S2 6.48 2 12.07C2 17.09 5.66 21.25 10.44 21.95v-6.99h-3.14v-2.8h3.14V9.41c0-3.1 1.84-4.8 4.66-4.8 1.35 0 2.76.24 2.76.24v3.03h-1.55c-1.53 0-2.01.96-2.01 1.95v2.32h3.42l-.55 2.8h-2.87v6.99C18.34 21.25 22 17.09 22 12.07z"/></svg>
           </a>
