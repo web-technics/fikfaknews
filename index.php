@@ -678,11 +678,6 @@ ini_set('display_errors', 0);
     }
     .video-title{font-weight:600;font-size:16px}
     .channel-actions{display:flex;gap:8px;align-items:center}
-    .share-panel{margin-top:12px;padding:12px;border:1px solid rgba(255,255,255,0.08);border-radius:10px;background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));}
-    .share-title{font-size:14px;font-weight:700;margin-bottom:10px;color:#fff}
-    .share-actions{display:flex;flex-wrap:wrap;gap:8px}
-    .share-actions .btn{font-size:13px;padding:8px 12px;min-height:40px}
-    .share-feedback{margin-top:8px;min-height:18px;font-size:12px;color:var(--muted)}
     .btn{
       background:var(--accent);
       color:#fff;
@@ -753,7 +748,6 @@ ini_set('display_errors', 0);
       .meta { flex-direction:column; align-items:flex-start; gap:10px; }
       .channel-actions { width:100%; }
       .channel-actions .btn { width:100%; }
-      .share-actions .btn { flex:1 1 calc(50% - 8px); min-width:0; }
       .event-promo { padding:16px 12px; border-radius:16px; }
       .event-promo-grid { grid-template-columns:1fr; }
       .event-promo-copy h3 { font-size:24px; }
@@ -1424,18 +1418,6 @@ ini_set('display_errors', 0);
             </div>
           </div>
 
-          <section class="share-panel" aria-label="Deel deze uitzending">
-            <div class="share-title">Deel deze uitzending</div>
-            <div class="share-actions">
-              <button type="button" class="btn" id="share-native-btn" aria-label="Delen via toestel">📲 Delen</button>
-              <a class="btn btn-outline" id="share-whatsapp" href="#" target="_blank" rel="noopener noreferrer" aria-label="Deel via WhatsApp">WhatsApp</a>
-              <a class="btn btn-outline" id="share-telegram" href="#" target="_blank" rel="noopener noreferrer" aria-label="Deel via Telegram">Telegram</a>
-              <a class="btn btn-outline" id="share-x" href="#" target="_blank" rel="noopener noreferrer" aria-label="Deel via X">X</a>
-              <a class="btn btn-outline" id="share-facebook" href="#" target="_blank" rel="noopener noreferrer" aria-label="Deel via Facebook">Facebook</a>
-              <button type="button" class="btn btn-outline" id="share-copy-btn" aria-label="Kopieer deellink">🔗 Kopieer link</button>
-            </div>
-            <div id="share-feedback" class="share-feedback" aria-live="polite"></div>
-          </section>
         </div>
 
         <div class="footer-note" id="status-note" role="status" aria-live="polite">
@@ -2172,13 +2154,6 @@ ini_set('display_errors', 0);
       const watchOnYouTube = document.getElementById('watch-on-youtube');
       const subscribeBtn = document.getElementById('subscribe-btn');
       const playerWrap = document.getElementById('player-wrap');
-      const shareNativeBtn = document.getElementById('share-native-btn');
-      const shareWhatsApp = document.getElementById('share-whatsapp');
-      const shareTelegram = document.getElementById('share-telegram');
-      const shareX = document.getElementById('share-x');
-      const shareFacebook = document.getElementById('share-facebook');
-      const shareCopyBtn = document.getElementById('share-copy-btn');
-      const shareFeedback = document.getElementById('share-feedback');
       const basePageUrl = <?php echo json_encode($baseUrl, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE); ?>;
       const initialVideoData = {
         videoId: <?php echo json_encode($selectedVideoId, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE); ?>,
@@ -2223,111 +2198,6 @@ ini_set('display_errors', 0);
         return videoId ? basePageUrl + '?v=' + encodeURIComponent(videoId) : basePageUrl;
       }
 
-      function setShareFeedback(message) {
-        if (!shareFeedback) {
-          return;
-        }
-        shareFeedback.textContent = message || '';
-      }
-
-      async function copyShareUrl(url) {
-        if (!url) {
-          return;
-        }
-
-        if (navigator.clipboard && window.isSecureContext) {
-          await navigator.clipboard.writeText(url);
-          return;
-        }
-
-        const fallbackInput = document.createElement('input');
-        fallbackInput.type = 'text';
-        fallbackInput.value = url;
-        fallbackInput.setAttribute('readonly', 'readonly');
-        fallbackInput.style.position = 'absolute';
-        fallbackInput.style.left = '-9999px';
-        document.body.appendChild(fallbackInput);
-        fallbackInput.select();
-        const copied = document.execCommand('copy');
-        document.body.removeChild(fallbackInput);
-
-        if (!copied) {
-          throw new Error('copy_failed');
-        }
-      }
-
-      function updateShareActions(videoId, title) {
-        if (!videoId) {
-          return;
-        }
-
-        const pageUrl = buildSharePageUrl(videoId);
-        const cleanTitle = (title || 'FikFak News uitzending').trim();
-        const shareTitle = '📰 ' + cleanTitle + ' | FikFak News';
-        const shareText = 'Bekijk deze FikFak News uitzending: ' + cleanTitle;
-        const combined = shareText + ' ' + pageUrl;
-
-        if (shareWhatsApp) {
-          shareWhatsApp.href = 'https://wa.me/?text=' + encodeURIComponent(combined);
-        }
-        if (shareTelegram) {
-          shareTelegram.href = 'https://t.me/share/url?url=' + encodeURIComponent(pageUrl) + '&text=' + encodeURIComponent(shareText);
-        }
-        if (shareX) {
-          shareX.href = 'https://x.com/intent/tweet?url=' + encodeURIComponent(pageUrl) + '&text=' + encodeURIComponent(shareText);
-        }
-        if (shareFacebook) {
-          shareFacebook.href = 'https://www.facebook.com/sharer/sharer.php?u=' + encodeURIComponent(pageUrl);
-        }
-        if (shareNativeBtn) {
-          shareNativeBtn.dataset.url = pageUrl;
-          shareNativeBtn.dataset.title = shareTitle;
-          shareNativeBtn.dataset.text = shareText;
-        }
-      }
-
-      if (shareNativeBtn && typeof navigator.share !== 'function') {
-        shareNativeBtn.style.display = 'none';
-      }
-
-      if (shareNativeBtn) {
-        shareNativeBtn.addEventListener('click', async () => {
-          const pageUrl = shareNativeBtn.dataset.url || window.location.href;
-          const shareTitle = shareNativeBtn.dataset.title || document.title;
-          const shareText = shareNativeBtn.dataset.text || 'Bekijk deze FikFak News uitzending';
-
-          try {
-            if (typeof navigator.share === 'function') {
-              await navigator.share({
-                title: shareTitle,
-                text: shareText,
-                url: pageUrl
-              });
-              setShareFeedback('Succesvol gedeeld.');
-            } else {
-              await copyShareUrl(pageUrl);
-              setShareFeedback('Link gekopieerd.');
-            }
-          } catch (error) {
-            if (error && error.name === 'AbortError') {
-              return;
-            }
-            setShareFeedback('Delen mislukt. Gebruik Kopieer link.');
-          }
-        });
-      }
-
-      if (shareCopyBtn) {
-        shareCopyBtn.addEventListener('click', async () => {
-          const pageUrl = (shareNativeBtn && shareNativeBtn.dataset.url) ? shareNativeBtn.dataset.url : window.location.href;
-          try {
-            await copyShareUrl(pageUrl);
-            setShareFeedback('Link gekopieerd naar klembord.');
-          } catch (error) {
-            setShareFeedback('Kopieren mislukt.');
-          }
-        });
-      }
 
       function syncBrowserUrl(videoId) {
         const nextUrl = new URL(window.location.href);
@@ -2513,7 +2383,6 @@ ini_set('display_errors', 0);
         const shareDescription = '🎯 ' + title + ' - Bekijk de nieuwste FikFak News uitzending!';
         
         syncBrowserUrl(videoId);
-        updateShareActions(videoId, title);
 
         let metaTitle = document.querySelector('meta[name="title"]');
         if (metaTitle) metaTitle.setAttribute('content', shareTitle);
