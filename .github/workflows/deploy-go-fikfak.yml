@@ -1,0 +1,49 @@
+name: Deploy go.fikfak.news
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-go-fikfak-news
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.DEPLOY_HOST }}
+          username: ${{ secrets.DEPLOY_USER }}
+          key: ${{ secrets.DEPLOY_SSH_KEY }}
+          port: ${{ secrets.DEPLOY_PORT }}
+          script_stop: true
+          script: |
+            set -e
+            cd "${{ secrets.DEPLOY_PATH }}"
+
+            if [ ! -d .git ]; then
+              echo "Deployment path is not a git repository: ${{ secrets.DEPLOY_PATH }}"
+              exit 1
+            fi
+
+            git fetch origin main
+            LOCAL_COMMIT=$(git rev-parse HEAD)
+            REMOTE_COMMIT=$(git rev-parse origin/main)
+
+            if [ "$LOCAL_COMMIT" = "$REMOTE_COMMIT" ]; then
+              echo "Already up to date: $LOCAL_COMMIT"
+              exit 0
+            fi
+
+            git pull --ff-only origin main
+
+            if command -v php >/dev/null 2>&1; then
+              php -l index.php
+            fi
+
+            echo "Deploy complete at commit $(git rev-parse HEAD)"
