@@ -112,12 +112,12 @@ if (!$decoded || !isset($decoded['videoId']) || $cacheIsStale) {
   }
 }
 
-$baseUrl = 'https://go.fikfak.news/';
+$requestScheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
+$requestHostRaw = trim((string) ($_SERVER['HTTP_HOST'] ?? ''));
+$requestHostSafe = preg_match('/^[A-Za-z0-9.-]+$/', $requestHostRaw) ? strtolower($requestHostRaw) : '';
+$baseUrl = $requestHostSafe !== '' ? ($requestScheme . '://' . $requestHostSafe . '/') : 'https://go.fikfak.news/';
 $requestedVideoId = isset($_GET['v']) ? trim((string) $_GET['v']) : '';
 $selectedVideo = $videoData;
-
-$requestHost = strtolower((string) ($_SERVER['HTTP_HOST'] ?? ''));
-// Emergency safety mode: avoid any cross-host redirect here to prevent loops.
 
 if ($requestedVideoId !== '' && preg_match('/^[A-Za-z0-9_-]{11}$/', $requestedVideoId)) {
   if ($requestedVideoId === (string) $videoData['videoId']) {
@@ -162,40 +162,16 @@ $pageDescription = 'Bekijk de nieuwste FikFak News uitzending met onafhankelijke
 $shareUrl = $baseUrl . '?v=' . rawurlencode($selectedVideoId);
 $canonicalUrl = $shareUrl;
 $thumbnailUrl = 'https://i.ytimg.com/vi/' . rawurlencode($selectedVideoId) . '/hqdefault.jpg';
-$thumbnailVersion = gmdate('YmdHis', $publishedTimestamp);
-$thumbnailShareUrl = $thumbnailUrl . '?v=' . rawurlencode($thumbnailVersion);
+$thumbnailShareUrl = $thumbnailUrl;
 $embedUrl = 'https://www.youtube.com/embed/' . rawurlencode($selectedVideoId);
 $watchUrl = 'https://www.youtube.com/watch?v=' . rawurlencode($selectedVideoId);
-
-$userAgent = isset($_SERVER['HTTP_USER_AGENT']) ? strtolower((string) $_SERVER['HTTP_USER_AGENT']) : '';
-$isSocialCrawler = false;
-if ($userAgent !== '') {
-  $socialCrawlerSignatures = [
-    'twitterbot',
-    'xbot',
-    'facebookexternalhit',
-    'whatsapp',
-    'telegrambot',
-    'linkedinbot',
-    'slackbot',
-    'discordbot',
-    'skypeuripreview',
-    'googlebot'
-  ];
-
-  foreach ($socialCrawlerSignatures as $signature) {
-    if (strpos($userAgent, $signature) !== false) {
-      $isSocialCrawler = true;
-      break;
-    }
-  }
-}
 
 header('Cache-Control: no-cache, no-store, must-revalidate, max-age=0');
 header('Pragma: no-cache');
 header('Expires: 0');
 
-if ($requestedVideoId === '' && $isSocialCrawler) {
+$requestMethod = strtoupper((string) ($_SERVER['REQUEST_METHOD'] ?? 'GET'));
+if ($requestedVideoId === '' && $requestMethod === 'GET') {
   header('Location: ' . $shareUrl, true, 302);
   exit;
 }
@@ -236,7 +212,7 @@ ini_set('display_errors', 0);
   <meta name="revisit-after" content="2 days" />
   
   <!-- Open Graph / Facebook / WhatsApp -->
-  <meta property="og:type" content="video.other" />
+  <meta property="og:type" content="website" />
   <meta property="og:url" content="<?php echo htmlspecialchars($shareUrl, ENT_QUOTES, 'UTF-8'); ?>" />
   <meta property="og:site_name" content="FikFak News" />
   <meta property="og:title" content="<?php echo htmlspecialchars($pageTitle, ENT_QUOTES, 'UTF-8'); ?>" />
@@ -272,7 +248,7 @@ ini_set('display_errors', 0);
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:site" content="@dirktheuns" />
   <meta name="twitter:creator" content="@dirktheuns" />
-  <meta name="twitter:domain" content="www.fikfak.news" />
+  <meta name="twitter:domain" content="<?php echo htmlspecialchars($requestHostSafe !== '' ? $requestHostSafe : 'go.fikfak.news', ENT_QUOTES, 'UTF-8'); ?>" />
   <meta name="twitter:url" content="<?php echo htmlspecialchars($shareUrl, ENT_QUOTES, 'UTF-8'); ?>" />
   <meta name="twitter:title" content="<?php echo htmlspecialchars($pageTitle, ENT_QUOTES, 'UTF-8'); ?>" />
   <meta name="twitter:description" content="<?php echo htmlspecialchars($pageDescription, ENT_QUOTES, 'UTF-8'); ?>" />
@@ -702,6 +678,11 @@ ini_set('display_errors', 0);
     }
     .video-title{font-weight:600;font-size:16px}
     .channel-actions{display:flex;gap:8px;align-items:center}
+    .share-panel{margin-top:12px;padding:12px;border:1px solid rgba(255,255,255,0.08);border-radius:10px;background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));}
+    .share-title{font-size:14px;font-weight:700;margin-bottom:10px;color:#fff}
+    .share-actions{display:flex;flex-wrap:wrap;gap:8px}
+    .share-actions .btn{font-size:13px;padding:8px 12px;min-height:40px}
+    .share-feedback{margin-top:8px;min-height:18px;font-size:12px;color:var(--muted)}
     .btn{
       background:var(--accent);
       color:#fff;
@@ -772,6 +753,7 @@ ini_set('display_errors', 0);
       .meta { flex-direction:column; align-items:flex-start; gap:10px; }
       .channel-actions { width:100%; }
       .channel-actions .btn { width:100%; }
+      .share-actions .btn { flex:1 1 calc(50% - 8px); min-width:0; }
       .event-promo { padding:16px 12px; border-radius:16px; }
       .event-promo-grid { grid-template-columns:1fr; }
       .event-promo-copy h3 { font-size:24px; }
@@ -1441,6 +1423,19 @@ ini_set('display_errors', 0);
           <a class="btn" id="subscribe-btn" href="#" target="_blank" rel="noopener" style="background:linear-gradient(135deg,#ff0000,#cc0000);font-weight:800;padding:10px 20px;font-size:15px;" aria-label="Abonneer op FikFak News YouTube kanaal">🔔 Abonneren op YouTube</a>
             </div>
           </div>
+
+          <section class="share-panel" aria-label="Deel deze uitzending">
+            <div class="share-title">Deel deze uitzending</div>
+            <div class="share-actions">
+              <button type="button" class="btn" id="share-native-btn" aria-label="Delen via toestel">📲 Delen</button>
+              <a class="btn btn-outline" id="share-whatsapp" href="#" target="_blank" rel="noopener noreferrer" aria-label="Deel via WhatsApp">WhatsApp</a>
+              <a class="btn btn-outline" id="share-telegram" href="#" target="_blank" rel="noopener noreferrer" aria-label="Deel via Telegram">Telegram</a>
+              <a class="btn btn-outline" id="share-x" href="#" target="_blank" rel="noopener noreferrer" aria-label="Deel via X">X</a>
+              <a class="btn btn-outline" id="share-facebook" href="#" target="_blank" rel="noopener noreferrer" aria-label="Deel via Facebook">Facebook</a>
+              <button type="button" class="btn btn-outline" id="share-copy-btn" aria-label="Kopieer deellink">🔗 Kopieer link</button>
+            </div>
+            <div id="share-feedback" class="share-feedback" aria-live="polite"></div>
+          </section>
         </div>
 
         <div class="footer-note" id="status-note" role="status" aria-live="polite">
@@ -2177,7 +2172,14 @@ ini_set('display_errors', 0);
       const watchOnYouTube = document.getElementById('watch-on-youtube');
       const subscribeBtn = document.getElementById('subscribe-btn');
       const playerWrap = document.getElementById('player-wrap');
-      const basePageUrl = 'https://www.fikfak.news/';
+      const shareNativeBtn = document.getElementById('share-native-btn');
+      const shareWhatsApp = document.getElementById('share-whatsapp');
+      const shareTelegram = document.getElementById('share-telegram');
+      const shareX = document.getElementById('share-x');
+      const shareFacebook = document.getElementById('share-facebook');
+      const shareCopyBtn = document.getElementById('share-copy-btn');
+      const shareFeedback = document.getElementById('share-feedback');
+      const basePageUrl = <?php echo json_encode($baseUrl, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE); ?>;
       const initialVideoData = {
         videoId: <?php echo json_encode($selectedVideoId, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE); ?>,
         title: <?php echo json_encode($selectedTitle, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE); ?>,
@@ -2219,6 +2221,112 @@ ini_set('display_errors', 0);
 
       function buildSharePageUrl(videoId) {
         return videoId ? basePageUrl + '?v=' + encodeURIComponent(videoId) : basePageUrl;
+      }
+
+      function setShareFeedback(message) {
+        if (!shareFeedback) {
+          return;
+        }
+        shareFeedback.textContent = message || '';
+      }
+
+      async function copyShareUrl(url) {
+        if (!url) {
+          return;
+        }
+
+        if (navigator.clipboard && window.isSecureContext) {
+          await navigator.clipboard.writeText(url);
+          return;
+        }
+
+        const fallbackInput = document.createElement('input');
+        fallbackInput.type = 'text';
+        fallbackInput.value = url;
+        fallbackInput.setAttribute('readonly', 'readonly');
+        fallbackInput.style.position = 'absolute';
+        fallbackInput.style.left = '-9999px';
+        document.body.appendChild(fallbackInput);
+        fallbackInput.select();
+        const copied = document.execCommand('copy');
+        document.body.removeChild(fallbackInput);
+
+        if (!copied) {
+          throw new Error('copy_failed');
+        }
+      }
+
+      function updateShareActions(videoId, title) {
+        if (!videoId) {
+          return;
+        }
+
+        const pageUrl = buildSharePageUrl(videoId);
+        const cleanTitle = (title || 'FikFak News uitzending').trim();
+        const shareTitle = '📰 ' + cleanTitle + ' | FikFak News';
+        const shareText = 'Bekijk deze FikFak News uitzending: ' + cleanTitle;
+        const combined = shareText + ' ' + pageUrl;
+
+        if (shareWhatsApp) {
+          shareWhatsApp.href = 'https://wa.me/?text=' + encodeURIComponent(combined);
+        }
+        if (shareTelegram) {
+          shareTelegram.href = 'https://t.me/share/url?url=' + encodeURIComponent(pageUrl) + '&text=' + encodeURIComponent(shareText);
+        }
+        if (shareX) {
+          shareX.href = 'https://x.com/intent/tweet?url=' + encodeURIComponent(pageUrl) + '&text=' + encodeURIComponent(shareText);
+        }
+        if (shareFacebook) {
+          shareFacebook.href = 'https://www.facebook.com/sharer/sharer.php?u=' + encodeURIComponent(pageUrl);
+        }
+        if (shareNativeBtn) {
+          shareNativeBtn.dataset.url = pageUrl;
+          shareNativeBtn.dataset.title = shareTitle;
+          shareNativeBtn.dataset.text = shareText;
+        }
+      }
+
+      if (shareNativeBtn && typeof navigator.share !== 'function') {
+        shareNativeBtn.style.display = 'none';
+      }
+
+      if (shareNativeBtn) {
+        shareNativeBtn.addEventListener('click', async () => {
+          const pageUrl = shareNativeBtn.dataset.url || window.location.href;
+          const shareTitle = shareNativeBtn.dataset.title || document.title;
+          const shareText = shareNativeBtn.dataset.text || 'Bekijk deze FikFak News uitzending';
+
+          try {
+            if (typeof navigator.share === 'function') {
+              await navigator.share({
+                title: shareTitle,
+                text: shareText,
+                url: pageUrl
+              });
+              setShareFeedback('Succesvol gedeeld.');
+            } else {
+              await copyShareUrl(pageUrl);
+              setShareFeedback('Link gekopieerd.');
+            }
+          } catch (error) {
+            if (error && error.name === 'AbortError') {
+              return;
+            }
+            setShareFeedback('Delen mislukt. Gebruik Kopieer link.');
+          }
+        });
+      }
+
+      if (shareCopyBtn) {
+        shareCopyBtn.addEventListener('click', async () => {
+          const pageUrl = (shareNativeBtn && shareNativeBtn.dataset.url) ? shareNativeBtn.dataset.url : window.location.href;
+          try {
+            await copyShareUrl(pageUrl);
+            setShareFeedback('Link gekopieerd naar klembord.');
+          } catch (error) {
+            setShareFeedback('Kopieren mislukt.');
+          }
+        });
       }
 
       function syncBrowserUrl(videoId) {
@@ -2405,6 +2513,7 @@ ini_set('display_errors', 0);
         const shareDescription = '🎯 ' + title + ' - Bekijk de nieuwste FikFak News uitzending!';
         
         syncBrowserUrl(videoId);
+        updateShareActions(videoId, title);
 
         let metaTitle = document.querySelector('meta[name="title"]');
         if (metaTitle) metaTitle.setAttribute('content', shareTitle);
